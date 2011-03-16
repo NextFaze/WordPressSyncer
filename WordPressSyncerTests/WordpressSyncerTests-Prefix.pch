@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'WordPressSyncerTests' target in the 'WordPressSyncerTests' project
+//
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+#endif
