@@ -7,6 +7,7 @@
 //
 
 #import "TestAppDocViewController.h"
+#import "MOWordPressSyncerComment.h"
 
 @implementation TestAppDocViewController
 
@@ -34,7 +35,12 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-	NSString *content = [NSString stringWithFormat:@"Content:\n%@", post.content];
+    NSMutableString *content = [NSMutableString string];
+	[content appendFormat:@"Content:\n%@\nDictionary data:\n%@", post.content, [[post dictionary] description]];
+    
+    for(MOWordPressSyncerComment *comment in post.comments) {
+        [content appendFormat:@"\nComment:\n%@\n", comment.content];
+    }
 	self.title = [NSString stringWithFormat:@"%@", post.postID];
 
     /*

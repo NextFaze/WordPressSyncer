@@ -27,6 +27,7 @@
 		[str appendFormat:@"%@: %@\n", key, [stats valueForKey:key]];
 	}
 	labelDocs.text = str;
+    LOG(@"stats: %@", str);
 	//[labelDocs sizeToFit];
 }
 
@@ -46,9 +47,8 @@
 		[self setStatus:@"inactive"];
 	}
 	else if(sender == buttonSync) {
-        [store release];
-        store = [[WordPressSyncerStore alloc] initWithPath:tfServer.text delegate:self];
-        store.syncer.categoryId = tfCategoryId.text;
+        store.serverPath = tfServer.text;
+        store.categoryId = tfCategoryId.text;
 		[self setStatus:@"syncing"];
 		[store fetchChanges];
 	}
@@ -77,6 +77,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
+    store = [[WordPressSyncerStore alloc] initWithName:TestAppServerName delegate:self];
+
 	tfServer.text = [[NSUserDefaults standardUserDefaults] valueForKey:TestAppServerURL];
 	tfCategoryId.text = [[NSUserDefaults standardUserDefaults] valueForKey:TestAppServerCategory];
 	[self updateStats];
@@ -144,6 +146,10 @@
 - (void)wordPressSyncerStoreFailed:(WordPressSyncerStore *)s {
 	[self updateStats];
 	[self setStatus:@"failure"];
+}
+
+- (void)wordPressSyncerStoreProgress:(WordPressSyncerStore *)store {
+    [self updateStats];
 }
 
 @end

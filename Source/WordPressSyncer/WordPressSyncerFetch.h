@@ -10,22 +10,33 @@
 
 @protocol WordPressSyncerFetchDelegate;
 
+typedef enum {
+    WordPressSyncerFetchTypePosts,
+    WordPressSyncerFetchTypeComments
+} WordPressSyncerFetchType;
+
 @interface WordPressSyncerFetch : NSObject {
 	NSError *error;
 	NSMutableData *data;
 	NSURL *url;
 	NSURLConnection *conn;
+    NSDictionary *responseHeaders;
 	NSString *username, *password;
+    NSString *etag;
     int code;
+    WordPressSyncerFetchType type;
     
 	id<WordPressSyncerFetchDelegate> delegate;
 }
 
+
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSURL *url;
 @property (nonatomic, assign) id<WordPressSyncerFetchDelegate> delegate;
-@property (nonatomic, retain) NSString *username, *password;
+@property (nonatomic, retain) NSString *username, *password, *etag;
 @property (nonatomic, readonly) int code;
+@property (nonatomic, assign) WordPressSyncerFetchType type;
+@property (nonatomic, readonly) NSDictionary *responseHeaders;
 
 - (id)initWithURL:(NSURL *)u;
 - (id)initWithURL:(NSURL *)u delegate:(id<WordPressSyncerFetchDelegate>)d;
@@ -34,6 +45,8 @@
 - (NSData *)data;
 - (NSString *)string;
 - (NSDictionary *)dictionaryFromXML;
+
+- (NSString *)responseEtag;
 
 @end
 

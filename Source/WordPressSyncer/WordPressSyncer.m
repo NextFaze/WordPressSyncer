@@ -13,7 +13,7 @@
 
 @implementation WordPressSyncer
 
-@synthesize delegate, serverPath, bytes, countReq, username, password;
+@synthesize delegate, serverPath, bytes, countHttpReq, username, password;
 @synthesize categoryId;
 
 #pragma mark Private
@@ -22,6 +22,46 @@
 	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)str, NULL,
 																			CFSTR(":/?#[]@!$&’()*+,;="), kCFStringEncodingUTF8);
 	return [result autorelease];
+}
+
+- (NSDate *)parseRssDate:(NSString *)dateString {
+    // parse date
+    //pubDate = "Sun, 01 Aug 2010 06:18:25 +0000";
+    NSDateFormatter *df = [[NSDateFormatter alloc] init];
+    [df setDateFormat:@"EEE, dd MMMM yyyy HH:mm:ss ZZZZ"];
+    NSDate *date = dateString ? [df dateFromString:dateString] : nil;
+    [df release];
+    return date;
+}
+
+// extract post id from the given url
+- (NSString *)parsePostID:(NSString *)url {
+    NSRange rangeID = [url rangeOfString:@"=\\d+" options:NSBackwardsSearch|NSRegularExpressionSearch];
+    NSString *postID = nil;
+
+    if(rangeID.location != NSNotFound) {
+        rangeID.location ++;
+        rangeID.length --;
+        postID = [url substringWithRange:rangeID];
+    }
+    return postID;
+}
+
+- (NSArray *)rssItems:(WordPressSyncerFetch *)fetcher {
+    NSDictionary *result = [fetcher dictionaryFromXML];
+    NSDictionary *rss = [result valueForKey:@"rss"];
+    NSArray *ret = nil;
+    
+    if(rss) result = rss;
+    id items = [[result valueForKey:@"channel"] valueForKey:@"item"];
+    
+    if([items isKindOfClass:[NSDictionary class]]) {
+        ret = [NSArray arrayWithObject:items];
+    } 
+    else if([items isKindOfClass:[NSArray class]]) {
+        ret = items;
+    }
+    return ret;
 }
 
 #pragma mark -
@@ -66,7 +106,11 @@
     return path;
 }
 
-- (void)fetchNextPage {
+- (NSString *)commentsRssUrl:(NSString *)postID {
+    return [NSString stringWithFormat:@"%@/?feed=rss2&p=%@", serverPath, postID];
+}
+
+- (void)fetchNextPageWithEtag:(NSString *)etag {
     if(stopped) {
         LOG(@"stopped, returning");
         return;
@@ -74,8 +118,15 @@
     pagenum++;
     NSURL *url = [NSURL URLWithString:[self rssUrl]];
     WordPressSyncerFetch *fetcher = [[WordPressSyncerFetch alloc] initWithURL:url delegate:self];
+    fetcher.type = WordPressSyncerFetchTypePosts;
+    fetcher.etag = etag;
     [fetcher fetch];
     [fetcher release];
+    countHttpReq++;
+}
+
+- (void)fetchNextPage {
+    [self fetchNextPageWithEtag:nil];
 }
 
 #pragma mark Public
@@ -89,10 +140,14 @@
 
 // reset counters
 - (void)reset {
-	bytes = countReq = 0;
+	bytes = countHttpReq = 0;
 }
 
 - (void)fetch {
+    [self fetchWithEtag:nil];
+}
+
+- (void)fetchWithEtag:(NSString *)etag {
     if(!stopped) {
         LOG(@"already fetching changes, returning");
 		return;
@@ -101,17 +156,26 @@
 	stopped = NO;
     pagenum = 0;
 
-    [self fetchNextPage];
+    [self fetchNextPageWithEtag:etag];
+}
+
+- (void)fetchComments:(NSString *)postID {
+    [self fetchComments:postID withEtag:nil];
+}
+
+- (void)fetchComments:(NSString *)postID withEtag:(NSString *)etag {
+    NSURL *url = [NSURL URLWithString:[self commentsRssUrl:postID]];
+    WordPressSyncerFetch *fetcher = [[WordPressSyncerFetch alloc] initWithURL:url delegate:self];
+    fetcher.etag = etag;
+    fetcher.type = WordPressSyncerFetchTypeComments;
+    [fetcher fetch];
+    [fetcher release];
+    countHttpReq++;
 }
 
 #pragma mark WordPressSyncerFetchDelegate
 
 - (void)wordPressSyncerFetchCompleted:(WordPressSyncerFetch *)fetcher {
-	
-	if(stopped) {
-		LOG(@"stopped, returning");
-		return;
-	}
 	
 	if(fetcher.error) {
 		// error occurred
@@ -128,40 +192,69 @@
 	int len = [[fetcher data] length];
 	bytes += len;
 
-    if(fetcher.code != 200) {
-        LOG(@"fetcher response (%d) != 200, stopping", fetcher.code);
-        [self stop];
-        return;
-    }
-
-    // split result into posts
-    NSDateFormatter *df = [[NSDateFormatter alloc] init];
-    
-    NSDictionary *result = [fetcher dictionaryFromXML];
-    NSArray *posts = [[[result valueForKey:@"rss"] valueForKey:@"channel"] valueForKey:@"item"];    
-    for(NSDictionary *post in posts) {
-        NSMutableDictionary *postData = [NSMutableDictionary dictionaryWithDictionary:post];
-
-        // extract post id
-        NSString *link = [postData valueForKey:@"link"];
-        NSRange rangeID = [link rangeOfString:@"=" options:NSBackwardsSearch];
-        NSString *postID = rangeID.location != NSNotFound ? [link substringFromIndex:rangeID.location + 1] : nil;        
-        [postData setValue:postID forKey:@"postID"];
-
-        // parse publish date
-        //pubDate = "Sun, 01 Aug 2010 06:18:25 +0000";
-        [df setDateFormat:@"EEE, dd MMMM yyyy HH:mm:ss ZZZZ"];
-        NSString *pubDate = [postData valueForKey:@"pubDate"];
-        NSDate *date = pubDate ? [df dateFromString:pubDate] : nil;
-        if(date) [postData setValue:date forKey:@"pubDate"];
+    if(fetcher.type == WordPressSyncerFetchTypePosts) {
         
-        [delegate wordPressSyncer:self didFetchPost:postData];
+        if(stopped) {
+            LOG(@"stopped, returning");
+            return;
+        }
+        
+        // fetched posts
+        if(fetcher.code != 200) {
+            LOG(@"posts fetcher response (%d) != 200, stopping", fetcher.code);
+            [self stop];
+            return;
+        }
+        
+        // split result into posts
+        
+        NSArray *posts = [self rssItems:fetcher];
+        if(posts == nil) {
+            LOG(@"no posts found");
+            [self stop];
+            return;
+        }
+        NSString *etag = [fetcher responseEtag];
+        
+        for(NSDictionary *post in posts) {
+            NSMutableDictionary *postData = [NSMutableDictionary dictionaryWithDictionary:post];
+            
+            // extract post id
+            NSString *postID = [self parsePostID:[postData valueForKey:@"link"]];
+            [postData setValue:postID forKey:@"postID"];
+            NSDate *pubDate = [self parseRssDate:[postData valueForKey:@"pubDate"]];
+            [postData setValue:pubDate forKey:@"pubDate"];
+            [postData setValue:etag forKey:@"etag"];
+            
+            [delegate wordPressSyncer:self didFetchPost:postData];
+        }
+        [self fetchNextPage];
     }
-    [df release];
-    
-    [self fetchNextPage];
+    else if(fetcher.type == WordPressSyncerFetchTypeComments) {
+        // fetched comments
+        
+        if(fetcher.code != 200) {
+            LOG(@"comments fetcher response (%d)", fetcher.code);
+            return;  // unmodified comments or error
+        }
+        
+        // split result into comments
+        NSString *etag = [fetcher responseEtag];
+        NSArray *comments = [self rssItems:fetcher];
+        NSMutableArray *list = [NSMutableArray array];
+        
+        for(NSDictionary *comment in comments) {
+            NSMutableDictionary *commentData = [NSMutableDictionary dictionaryWithDictionary:comment];
+            NSDate *pubDate = [self parseRssDate:[commentData valueForKey:@"pubDate"]];
+            NSString *postID = [self parsePostID:[commentData valueForKey:@"link"]];
+            [commentData setValue:pubDate forKey:@"pubDate"];
+            [commentData setValue:postID forKey:@"postID"];
+            [commentData setValue:etag forKey:@"etag"];
+            
+            [list addObject:commentData];
+        }
+        [delegate wordPressSyncer:self didFetchComments:list];
+    }    
 }
 
 @end
-
-

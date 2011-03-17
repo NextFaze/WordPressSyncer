@@ -82,6 +82,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B5362E731331ADA500B88A27 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		B59556CD13302DE400BE924A /* libWordPressSyncer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWordPressSyncer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B59556D013302DE400BE924A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B59556DA13302DE400BE924A /* WordPressSyncerTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WordPressSyncerTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -171,6 +172,7 @@
 		B59556C213302DE400BE924A = {
 			isa = PBXGroup;
 			children = (
+				B5362E731331ADA500B88A27 /* README.md */,
 				B5F34CD8133060A40007869D /* CoreData.framework */,
 				B5F34C51133035B70007869D /* WordPressSyncerTestApp */,
 				B59556FC13302E7300BE924A /* WordPressSyncer */,

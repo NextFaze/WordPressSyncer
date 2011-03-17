@@ -27,6 +27,9 @@
 
 - (id)initWithPosts:(NSArray *)list {
 	if((self = [super init])) {
+        NSSortDescriptor *sort = [[NSSortDescriptor alloc] initWithKey:@"title" ascending:YES];
+        list = [list sortedArrayUsingDescriptors:[NSArray arrayWithObjects:sort, nil]];
+        [sort release];
 		posts = [list retain];
 	}
 	return self;
@@ -100,7 +103,9 @@
     
     // Configure the cell...
     MOWordPressSyncerPost *post = [posts objectAtIndex:indexPath.row];
-	cell.textLabel.text = [NSString stringWithFormat:@"%@", post.postID];
+    NSString *title = [[post dictionary] valueForKey:@"title"];
+    cell.textLabel.font = [UIFont systemFontOfSize:14];
+	cell.textLabel.text = [NSString stringWithFormat:@"%@ (%@)", title, post.postID];
 	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	
     return cell;

@@ -14,7 +14,7 @@
 
 @implementation WordPressSyncerFetch
 
-@synthesize url, delegate, error, username, password, code;
+@synthesize url, delegate, error, username, password, code, type, etag, responseHeaders;
 
 #pragma mark -
 
@@ -40,6 +40,8 @@
 	[error release];
 	[username release];
 	[password release];
+    [responseHeaders release];
+    [etag release];
 	
 	[super dealloc];
 }
@@ -63,6 +65,11 @@
 		[req addValue:[NSString stringWithFormat:@"Basic %@", authString64] forHTTPHeaderField:@"Authorization"]; 
 	}
 	
+    if(etag) {
+        LOG(@"using etag: %@", etag);
+        [req addValue:etag forHTTPHeaderField:@"If-None-Match"];
+    }
+    
 	conn = [NSURLConnection alloc];
 	[conn initWithRequest:req delegate:self startImmediately:NO];
 	[conn scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
@@ -91,6 +98,12 @@
     return dict;
 }
 
+- (NSString *)responseEtag {
+    NSString *et = [responseHeaders valueForKey:@"ETag"];
+    if(et == nil) et = [responseHeaders valueForKey:@"Etag"];
+    return et;
+}
+
 #pragma mark NSURLConnectionDelegate
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)err {
@@ -112,6 +125,8 @@
 	if ([res respondsToSelector:@selector(allHeaderFields)]) {
 		NSDictionary *dictionary = [httpResponse allHeaderFields];
 		code = [httpResponse statusCode];
+        [responseHeaders release];
+        responseHeaders = [dictionary retain];
 		LOG(@"response code: %d, content length: %@", code, [dictionary valueForKey:@"Content-Length"]);
 	}
 }

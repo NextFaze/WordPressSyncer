@@ -16,6 +16,9 @@
 }
 @property (nonatomic, retain) NSNumber * commentID;
 @property (nonatomic, retain) NSString * content;
+@property (nonatomic, retain) NSString * creator;
+@property (nonatomic, retain) NSString * title;
+@property (nonatomic, retain) NSDate * pubDate;
 @property (nonatomic, retain) MOWordPressSyncerPost * post;
 
 @end

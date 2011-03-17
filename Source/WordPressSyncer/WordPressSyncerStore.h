@@ -31,13 +31,13 @@
 }
 
 @property (nonatomic, readonly) NSString *name;
-@property (nonatomic, readonly) NSString *serverPath;
+@property (nonatomic, retain) NSString *serverPath, *categoryId;
 @property (nonatomic, retain) NSObject<WordPressSyncerStoreDelegate> *delegate;
 @property (nonatomic, readonly) NSError *error;
 @property (nonatomic, readonly) WordPressSyncer *syncer;
 @property (nonatomic, retain) NSString *username, *password;
 
-- (id)initWithPath:(NSString *)url delegate:(id)d;
+- (id)initWithName:(NSString *)name delegate:(id)d;
 
 - (void)fetchChanges;
 - (void)purge;
@@ -53,5 +53,8 @@
 
 - (void)wordPressSyncerStoreCompleted:(WordPressSyncerStore *)store;
 - (void)wordPressSyncerStoreFailed:(WordPressSyncerStore *)store;
+
+@optional
+- (void)wordPressSyncerStoreProgress:(WordPressSyncerStore *)store;
 
 @end

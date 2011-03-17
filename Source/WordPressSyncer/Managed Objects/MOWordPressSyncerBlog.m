@@ -14,6 +14,7 @@
 @dynamic url;
 @dynamic name;
 @dynamic posts;
+@dynamic rssEtag;
 
 - (void)addPostsObject:(MOWordPressSyncerPost *)value {    
     NSSet *changedObjects = [[NSSet alloc] initWithObjects:&value count:1];

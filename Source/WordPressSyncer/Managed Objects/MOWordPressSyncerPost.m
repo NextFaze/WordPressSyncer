@@ -17,7 +17,14 @@
 @dynamic dictionaryData;
 @dynamic blog;
 @dynamic comments;
+@dynamic title;
+@dynamic pubDate;
+@dynamic creator;
+@dynamic commentsEtag;
 
+- (NSDictionary *)dictionary {
+    return (NSDictionary *)[NSKeyedUnarchiver unarchiveObjectWithData:self.dictionaryData];
+}
 
 - (void)addCommentsObject:(MOWordPressSyncerComment *)value {    
     NSSet *changedObjects = [[NSSet alloc] initWithObjects:&value count:1];

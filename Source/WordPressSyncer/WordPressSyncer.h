@@ -17,7 +17,7 @@
 	
 	BOOL stopped;
 
-	int countReq, bytes, pagenum;
+	int countHttpReq, bytes, pagenum;
     
 	NSString *username, *password;
     NSString *categoryId;
@@ -25,13 +25,17 @@
 
 @property (nonatomic, retain) NSString *serverPath;
 @property (nonatomic, assign) id<WordPressSyncerDelegate> delegate;
-@property (nonatomic, readonly) int bytes, countReq;
+@property (nonatomic, readonly) int bytes, countHttpReq;
 @property (nonatomic, retain) NSString *username, *password;
 @property (nonatomic, retain) NSString *categoryId;
 
 - (id)initWithPath:(NSString *)path delegate:(id<WordPressSyncerDelegate>)d;
 
-- (void)fetch; // fetch data
+- (void)fetch; // fetch posts
+- (void)fetchWithEtag:(NSString *)etag;
+- (void)fetchComments:(NSString *)postID;
+- (void)fetchComments:(NSString *)postID withEtag:(NSString *)etag;
+
 - (void)stop;  // stop fetching data
 
 @end

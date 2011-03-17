@@ -16,8 +16,14 @@
 }
 @property (nonatomic, retain) NSNumber * postID;
 @property (nonatomic, retain) NSString * content;
+@property (nonatomic, retain) NSString * title;
+@property (nonatomic, retain) NSString * creator;
+@property (nonatomic, retain) NSString * commentsEtag;
+@property (nonatomic, retain) NSDate * pubDate;
 @property (nonatomic, retain) NSData * dictionaryData;
 @property (nonatomic, retain) MOWordPressSyncerBlog * blog;
 @property (nonatomic, retain) NSSet* comments;
+
+- (NSDictionary *)dictionary;
 
 @end

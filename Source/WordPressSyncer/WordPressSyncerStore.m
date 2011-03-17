@@ -17,31 +17,29 @@
 
 @implementation WordPressSyncerStore
 
-@synthesize name, delegate, error, syncer, username, password, serverPath;
+@synthesize name, delegate, error, syncer, username, password, categoryId;
 
-- (id)initWithPath:(NSString *)url delegate:(id)d {
-	if(url && (self = [super init])) {
+- (id)initWithName:(NSString *)n delegate:(id)d {
+	if(n && (self = [super init])) {
 		delegate = d;
-        serverPath = [url retain];
+        name = [n retain];
         
 		// set up core data
 		[self managedObjectContext];
 		if(managedObjectContext == nil) return self;  // error with core data
 
-		// initialise syncer 
-		syncer = [[WordPressSyncer alloc] initWithPath:url delegate:self];
-
 		// fetch or create blog record
-		NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:url, @"URL", nil];
+		NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:name, @"NAME", nil];
 		NSError *err = nil;
         LOG(@"data: %@", data);
-		NSFetchRequest *fetch = [managedObjectModel fetchRequestFromTemplateWithName:@"blogByURL" substitutionVariables:data];
+		NSFetchRequest *fetch = [managedObjectModel fetchRequestFromTemplateWithName:@"blogByName" substitutionVariables:data];
 		NSArray *blogs = [managedObjectContext executeFetchRequest:fetch error:&err];
 		blog = blogs.count ? [[blogs objectAtIndex:0] retain] : nil;
 		
 		if(blog == nil) {
 			// add server record
 			blog = [[NSEntityDescription insertNewObjectForEntityForName:@"Blog" inManagedObjectContext:managedObjectContext] retain];
+            blog.name = name;
 			[self saveDatabase];
 		}
 	}
@@ -52,6 +50,7 @@
 - (void)dealloc {
 	[name release];
 	[serverPath release];
+    [categoryId release];
 	[blog release];
 	[error release];
 	[syncer release];
@@ -79,10 +78,30 @@
 	[delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreFailed:) withObject:self waitUntilDone:YES];
 }
 
+- (void)reportProgress {
+    if([delegate respondsToSelector:@selector(wordPressSyncerStoreProgress:)])
+        [delegate wordPressSyncerStoreProgress:self];
+}
+
 #pragma mark -
 
--(void)fetchChanges {
-	[syncer fetch];  // detect if database has been deleted since last fetch - purge all local data in that case.
+- (void)setServerPath:(NSString *)path {
+    blog.url = path;
+}
+- (NSString *)serverPath {
+    return blog.url;
+}
+
+- (void)fetchChanges {
+    if(blog.url) {
+        // initialise syncer 
+        if(syncer == nil) {
+            syncer = [[WordPressSyncer alloc] initWithPath:blog.url delegate:self];
+        }
+        syncer.serverPath = blog.url;
+        syncer.categoryId = categoryId;
+        [syncer fetchWithEtag:blog.rssEtag];
+    }
 }
 
 // purge this store
@@ -91,6 +110,7 @@
 	for(MOWordPressSyncerPost *post in blog.posts) {
 		[managedObjectContext deleteObject:post];
 	}
+    blog.rssEtag = nil;
 	[self saveDatabase];
 }
 
@@ -112,6 +132,7 @@
 			[NSNumber numberWithInt:posts], @"posts",
 			[NSNumber numberWithInt:comments], @"comments",
 			[NSNumber numberWithInt:syncer.bytes], @"bytes transferred",
+            [NSNumber numberWithInt:syncer.countHttpReq], @"HTTP requests",
 			nil];
 }
 
@@ -233,7 +254,7 @@
 // return the managed object comment for the given comment
 - (MOWordPressSyncerComment *)managedObjectComment:(NSDictionary *)commentData {
 	NSError *err = nil;
-    NSDictionary *commentId = [commentData valueForKey:@"commentId"];
+    NSDictionary *commentId = [commentData valueForKey:@"commentID"];
     NSString *postId = [commentData valueForKey:@"postID"];
     if(postId == nil || commentId == nil) return nil;
 	NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:postId, @"POST_ID", commentId, @"COMMENT_ID", nil];
@@ -244,61 +265,81 @@
 
 #pragma mark WordPressSyncerDelegate
 
-/*
-
-- (void)wordPressSyncer:(WordPressSyncer *)s didFetchComment:(NSDictionary *)commentData {
-	LOG(@"fetched comment: %@", commentData);
-	
-	// save document
-	// add/update server record
-	MOWordPressSyncerComment *document = [self managedObjectDocument:doc];
-	NSDictionary *dict = [doc dictionary];
-	NSData *dictData = [NSKeyedArchiver archivedDataWithRootObject:dict];
-	
-	if(document == nil) {
-		// create new document
-		document = [NSEntityDescription insertNewObjectForEntityForName:@"Document" inManagedObjectContext:managedObjectContext];
-	}
-	
-	document.documentId = doc.documentId;
-	document.revision = doc.revision;
-	document.content = doc.content;
-	document.dictionaryData = dictData;
-	document.type = [dict valueForKey:@"type"];
-	document.parentId = [dict valueForKey:@"parentId"];
-	document.database = db;
-	document.length = [NSNumber numberWithInt:[document.content length]];
-
-	// save database (updates sequence id)
-	[self saveDatabase:doc.sequenceId];
-	
-	for(WordPressSyncerAttachment *att in doc.attachments) {
-		// check if we need to download attachment (revpos)
-		MOWordPressSyncerAttachment *attachment = [self managedObjectAttachment:att];
-		if(attachment == nil || ([attachment.revpos intValue] != att.revpos)) {
-			// attachment not yet downloaded or revision has increased, download attachment
-			[syncer fetchDocument:doc attachment:att];
-		}
-	}
+- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSArray *)comments {
+    NSDictionary *cdata = [comments objectAtIndex:0];
+    NSString *etag = [cdata valueForKey:@"etag"];
+    MOWordPressSyncerPost *post = [self managedObjectPost:cdata];
+    
+    if(post == nil) {
+        LOG(@"could not find post for comments, skipping");
+        return;
+    }
+    
+    // remove all existing comments
+    for(MOWordPressSyncerComment *comment in post.comments) {
+        [managedObjectContext deleteObject:comment];
+    }
+    
+    LOG(@"setting post %@ comments etag: %@", post.postID, etag);
+    post.commentsEtag = etag;
+    
+    for(NSDictionary *commentData in comments) {
+        // create new document
+        MOWordPressSyncerComment *comment = [NSEntityDescription insertNewObjectForEntityForName:@"Comment" inManagedObjectContext:managedObjectContext];
+        
+        comment.title = [commentData valueForKey:@"title"];
+        comment.content = [commentData valueForKey:@"description"];
+        comment.pubDate = [commentData valueForKey:@"pubDate"];
+        comment.creator = [commentData valueForKey:@"dc:creator"];
+        comment.post = post;
+    }
+    LOG(@"fetched %d comments for post: %@", [comments count], post.postID);
+    
+    // save database
+    [self saveDatabase];
+    [self reportProgress];
 }
- */
 
 - (void)wordPressSyncer:(WordPressSyncer *)s didFetchPost:(NSDictionary *)postData {
     MOWordPressSyncerPost *post = [self managedObjectPost:postData];
     NSString *postID = [postData valueForKey:@"postID"];
+    NSString *etag = [postData valueForKey:@"etag"];
 
 	if(post == nil) {
 		// create new post
 		post = [NSEntityDescription insertNewObjectForEntityForName:@"Post" inManagedObjectContext:managedObjectContext];
 	}
     
+    if(etag) {
+        LOG(@"setting blog rss etag: %@", etag);
+        blog.rssEtag = etag;
+    }
+    
 	post.content = [postData valueForKey:@"content:encoded"];
 	post.postID = [NSNumber numberWithInt:[postID intValue]];
 	post.dictionaryData = [NSKeyedArchiver archivedDataWithRootObject:postData];
-    LOG(@"fetched post: %@", postID);
+    post.blog = blog;
+    post.pubDate = [postData valueForKey:@"pubDate"];
+    post.title = [postData valueForKey:@"title"];
+    post.creator = [postData valueForKey:@"dc:creator"];
+    LOG(@"fetched post: %@ (%@)", postID, post.title);
     
 	// save database
 	[self saveDatabase];
+    
+    int commentCount = [[postData valueForKey:@"slash:comments"] intValue];
+    if(commentCount > 0) {
+        // download comments
+        [syncer fetchComments:postID withEtag:post.commentsEtag];
+    }
+    else if(commentCount == 0 && [post.comments count]) {
+        // remove all comments
+        for(MOWordPressSyncerComment *comment in post.comments) {
+            [managedObjectContext deleteObject:comment];
+        }
+    }
+    
+    [self reportProgress];
 }
 
 - (void)wordPressSyncerCompleted:(WordPressSyncer *)syncer {

@@ -14,6 +14,8 @@
 @dynamic commentID;
 @dynamic content;
 @dynamic post;
-
+@dynamic creator;
+@dynamic pubDate;
+@dynamic title;
 
 @end
