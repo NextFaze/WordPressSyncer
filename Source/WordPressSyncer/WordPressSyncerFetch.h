@@ -16,17 +16,17 @@ typedef enum {
 } WordPressSyncerFetchType;
 
 @interface WordPressSyncerFetch : NSObject {
-	NSError *error;
-	NSMutableData *data;
-	NSURL *url;
-	NSURLConnection *conn;
+    NSError *error;
+    NSMutableData *data;
+    NSURL *url;
+    NSURLConnection *conn;
     NSDictionary *responseHeaders;
-	NSString *username, *password;
+    NSString *username, *password;
     NSString *etag;
     int code;
     WordPressSyncerFetchType type;
     
-	id<WordPressSyncerFetchDelegate> delegate;
+    id<WordPressSyncerFetchDelegate> delegate;
 }
 
 

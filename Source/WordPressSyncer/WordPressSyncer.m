@@ -19,9 +19,9 @@
 #pragma mark Private
 
 - (NSString *)urlEncodeValue:(NSString *)str {
-	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)str, NULL,
-																			CFSTR(":/?#[]@!$&’()*+,;="), kCFStringEncodingUTF8);
-	return [result autorelease];
+    NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)str, NULL,
+                                                                            CFSTR(":/?#[]@!$&’()*+,;="), kCFStringEncodingUTF8);
+    return [result autorelease];
 }
 
 - (NSDate *)parseRssDate:(NSString *)dateString {
@@ -38,7 +38,7 @@
 - (NSString *)parsePostID:(NSString *)url {
     NSRange rangeID = [url rangeOfString:@"=\\d+" options:NSBackwardsSearch|NSRegularExpressionSearch];
     NSString *postID = nil;
-
+    
     if(rangeID.location != NSNotFound) {
         rangeID.location ++;
         rangeID.length --;
@@ -67,42 +67,42 @@
 #pragma mark -
 
 - (id)init {
-	if((self = [super init])) {
+    if((self = [super init])) {
         stopped = YES;
-	}
-	return self;
+    }
+    return self;
 }
 
 - (id)initWithPath:(NSString *)path delegate:(id<WordPressSyncerDelegate>)d {
-	if((self = [self init])) {
-		self.serverPath = path;
-		self.delegate = d;
-	}
-	return self;
+    if((self = [self init])) {
+        self.serverPath = path;
+        self.delegate = d;
+    }
+    return self;
 }
 
 - (void)dealloc {
-	delegate = nil;
-	[serverPath release];
-	
-	[super dealloc];
+    delegate = nil;
+    [serverPath release];
+    
+    [super dealloc];
 }
 
 #pragma mark -
 
 - (NSString *)rssUrl {
     NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:
-                          [NSString stringWithFormat:@"%d", pagenum], @"paged",
-                          @"rss2", @"feed",
-                          categoryId, @"cat",
-                          nil];
+                            [NSString stringWithFormat:@"%d", pagenum], @"paged",
+                            @"rss2", @"feed",
+                            categoryId, @"cat",
+                            nil];
     NSMutableArray *paramList = [NSMutableArray array];
     for(NSString *key in [params allKeys]) {
         [paramList addObject:[NSString stringWithFormat:@"%@=%@", key, [params valueForKey:key]]];
     }
     NSString *query = [paramList componentsJoinedByString:@"&"];
     NSString *path = [NSString stringWithFormat:@"%@/?%@", serverPath, query];
-
+    
     return path;
 }
 
@@ -132,15 +132,15 @@
 #pragma mark Public
 
 - (void)stop {
-	// abort all document fetches
-	// (prevents new documents being fetched)
-	stopped = YES;
+    // abort all document fetches
+    // (prevents new documents being fetched)
+    stopped = YES;
     [delegate wordPressSyncerCompleted:self];
 }
 
 // reset counters
 - (void)reset {
-	bytes = countHttpReq = 0;
+    bytes = countHttpReq = 0;
 }
 
 - (void)fetch {
@@ -150,12 +150,12 @@
 - (void)fetchWithEtag:(NSString *)etag {
     if(!stopped) {
         LOG(@"already fetching changes, returning");
-		return;
-	}
-	
-	stopped = NO;
+        return;
+    }
+    
+    stopped = NO;
     pagenum = 0;
-
+    
     [self fetchNextPageWithEtag:etag];
 }
 
@@ -176,22 +176,22 @@
 #pragma mark WordPressSyncerFetchDelegate
 
 - (void)wordPressSyncerFetchCompleted:(WordPressSyncerFetch *)fetcher {
-	
-	if(fetcher.error) {
-		// error occurred
-		// TODO: retry fetches a few times ?
-		// abort all outstanding fetch requests
-		[self stop];
-		
-		// notify delegate
-		[delegate wordPressSyncer:self didFailWithError:fetcher.error];
-		return;
-	}
-	
-	// fetched rss feed
-	int len = [[fetcher data] length];
-	bytes += len;
-
+    
+    if(fetcher.error) {
+        // error occurred
+        // TODO: retry fetches a few times ?
+        // abort all outstanding fetch requests
+        [self stop];
+        
+        // notify delegate
+        [delegate wordPressSyncer:self didFailWithError:fetcher.error];
+        return;
+    }
+    
+    // fetched rss feed
+    int len = [[fetcher data] length];
+    bytes += len;
+    
     if(fetcher.type == WordPressSyncerFetchTypePosts) {
         
         if(stopped) {

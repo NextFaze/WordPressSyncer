@@ -22,7 +22,7 @@ NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
 #pragma mark -
 
 - (void)dealloc {
-	[parser release];
+    [parser release];
     [error release];
     [dictionaryStack release];
     [textInProgress release];
@@ -52,7 +52,7 @@ NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
  
  convert: { key1 => { text => 'value1' }, key2 => ( { text => 'value2' }, { text =>  'value3' } ) }
  to:      { key1 => 'value1', key2 => ('value2', 'value3') }
-*/
+ */
 
 - (id)compactDictionary:(NSDictionary *)src {
     
@@ -103,7 +103,7 @@ NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
         LOG(@"found unescaped ampersand at index %d", rangeAmp.location);
         [str replaceCharactersInRange:rangeAmp withString:@"&amp;"];
     }
-
+    
     NSData *ret = [str dataUsingEncoding:NSUTF8StringEncoding];
     [str release];
     return ret;
@@ -154,7 +154,7 @@ NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
 {
     // Get the dictionary for the current level in the stack
     NSMutableDictionary *parentDict = [dictionaryStack lastObject];
-
+    
     // Create the child dictionary for the new element, and initilaize it with the attributes
     NSMutableDictionary *childDict = [NSMutableDictionary dictionary];
     [childDict addEntriesFromDictionary:attributeDict];
@@ -174,7 +174,7 @@ NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
             // Create an array if it doesn't exist
             array = [NSMutableArray array];
             [array addObject:existingValue];
-
+            
             // Replace the child dictionary with an array of children dictionaries
             [parentDict setObject:array forKey:elementName];
         }
@@ -202,7 +202,7 @@ NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
     {
         NSString *text = [textInProgress stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         [dictInProgress setObject:text forKey:kWordPressSyncerXMLReaderTextNodeKey];
-
+        
         // Reset the text
         [textInProgress release];
         textInProgress = [[NSMutableString alloc] init];

@@ -9,8 +9,8 @@
 
 #ifndef LOG
 #ifdef DEBUG
-	#define LOG(format, ...) NSLog(@"%s:%@", __PRETTY_FUNCTION__,[NSString stringWithFormat:format, ## __VA_ARGS__])
+#define LOG(format, ...) NSLog(@"%s:%@", __PRETTY_FUNCTION__,[NSString stringWithFormat:format, ## __VA_ARGS__])
 #else
-	#define LOG(format, ...)
+#define LOG(format, ...)
 #endif
 #endif

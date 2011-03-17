@@ -12,14 +12,14 @@
 #import "WordPressSyncerFetch.h"
 
 @interface WordPressSyncer : NSObject <WordPressSyncerFetchDelegate> {
-	NSString *serverPath;
-	id<WordPressSyncerDelegate> delegate;
-	
-	BOOL stopped;
-
-	int countHttpReq, bytes, pagenum;
+    NSString *serverPath;
+    id<WordPressSyncerDelegate> delegate;
     
-	NSString *username, *password;
+    BOOL stopped;
+    
+    int countHttpReq, bytes, pagenum;
+    
+    NSString *username, *password;
     NSString *categoryId;
 }
 

@@ -11,7 +11,7 @@
     NSMutableArray *dictionaryStack;
     NSMutableString *textInProgress;
     NSError *error;
-	NSXMLParser *parser;
+    NSXMLParser *parser;
 }
 
 @property (nonatomic, retain) NSError *error;

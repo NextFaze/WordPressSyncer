@@ -11,11 +11,11 @@
 #define WordPressSyncerErrorDomain @"WordPressSyncer"
 
 typedef enum {
-	WordPressSyncerErrorStore,
+    WordPressSyncerErrorStore,
 } WordPressSyncerErrorCode;
 
 @interface WordPressSyncerError : NSObject {
-
+    
 }
 
 + (WordPressSyncerError *)errorWithCode:(WordPressSyncerErrorCode)code;
