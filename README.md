@@ -9,14 +9,11 @@ Synopsis
 
     WordPressSyncerStore *store = [[WordPressSyncerStore alloc] initWithName:@"Store" delegate:self];
     store.categoryId = @"21";  // optional - restrict to specified category
-    store.
+    store.serverPath = @"http://example.com/wp";  // URL to wordpress
     [store fetch];
     
     #pragma mark WordPressSyncerStoreDelegate
     
-
-@optional
-
     // called whenever some progress has been made.
     - (void)wordPressSyncerStoreProgress:(WordPressSyncerStore *)store;
 
