@@ -29,6 +29,23 @@
 		B595577F133033E100BE924A /* WordPressSyncerStore.h in Headers */ = {isa = PBXBuildFile; fileRef = B5955769133033E000BE924A /* WordPressSyncerStore.h */; };
 		B5955780133033E100BE924A /* WordPressSyncerStore.m in Sources */ = {isa = PBXBuildFile; fileRef = B595576A133033E000BE924A /* WordPressSyncerStore.m */; };
 		B5955781133033E100BE924A /* WordPressSyncerStore.m in Sources */ = {isa = PBXBuildFile; fileRef = B595576A133033E000BE924A /* WordPressSyncerStore.m */; };
+		B5B9495F133331B80047564A /* CharacterEntity.h in Headers */ = {isa = PBXBuildFile; fileRef = B5B94956133331B80047564A /* CharacterEntity.h */; };
+		B5B94960133331B80047564A /* CharacterEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B94957133331B80047564A /* CharacterEntity.m */; };
+		B5B94961133331B80047564A /* CharacterEntityConverter-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = B5B94958133331B80047564A /* CharacterEntityConverter-Prefix.pch */; };
+		B5B94962133331B80047564A /* CharacterEntityConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = B5B94959133331B80047564A /* CharacterEntityConverter.h */; };
+		B5B94963133331B80047564A /* CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495A133331B80047564A /* CharacterEntityConverter.m */; };
+		B5B94964133331B80047564A /* NSMutableString+CharacterEntityConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = B5B9495B133331B80047564A /* NSMutableString+CharacterEntityConverter.h */; };
+		B5B94965133331B80047564A /* NSMutableString+CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495C133331B80047564A /* NSMutableString+CharacterEntityConverter.m */; };
+		B5B94966133331B80047564A /* NSString+CharacterEntityConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = B5B9495D133331B80047564A /* NSString+CharacterEntityConverter.h */; };
+		B5B94967133331B80047564A /* NSString+CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495E133331B80047564A /* NSString+CharacterEntityConverter.m */; };
+		B5B94968133334DF0047564A /* CharacterEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B94957133331B80047564A /* CharacterEntity.m */; };
+		B5B94969133334DF0047564A /* CharacterEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B94957133331B80047564A /* CharacterEntity.m */; };
+		B5B9496A133334E40047564A /* CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495A133331B80047564A /* CharacterEntityConverter.m */; };
+		B5B9496B133334E50047564A /* CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495A133331B80047564A /* CharacterEntityConverter.m */; };
+		B5B9496C133334E70047564A /* NSMutableString+CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495C133331B80047564A /* NSMutableString+CharacterEntityConverter.m */; };
+		B5B9496D133334E80047564A /* NSMutableString+CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495C133331B80047564A /* NSMutableString+CharacterEntityConverter.m */; };
+		B5B9496E133334EA0047564A /* NSString+CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495E133331B80047564A /* NSString+CharacterEntityConverter.m */; };
+		B5B9496F133334EB0047564A /* NSString+CharacterEntityConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B9495E133331B80047564A /* NSString+CharacterEntityConverter.m */; };
 		B5DFF10D13306C530026638B /* WordPressSyncerDB.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B5DFF10B13306C530026638B /* WordPressSyncerDB.xcdatamodeld */; };
 		B5DFF10E13306C530026638B /* WordPressSyncerDB.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B5DFF10B13306C530026638B /* WordPressSyncerDB.xcdatamodeld */; };
 		B5DFF10F13306C530026638B /* WordPressSyncerDB.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B5DFF10B13306C530026638B /* WordPressSyncerDB.xcdatamodeld */; };
@@ -104,6 +121,15 @@
 		B5955766133033E000BE924A /* WordPressSyncerFetch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WordPressSyncerFetch.m; sourceTree = "<group>"; };
 		B5955769133033E000BE924A /* WordPressSyncerStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordPressSyncerStore.h; sourceTree = "<group>"; };
 		B595576A133033E000BE924A /* WordPressSyncerStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WordPressSyncerStore.m; sourceTree = "<group>"; };
+		B5B94956133331B80047564A /* CharacterEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CharacterEntity.h; sourceTree = "<group>"; };
+		B5B94957133331B80047564A /* CharacterEntity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CharacterEntity.m; sourceTree = "<group>"; };
+		B5B94958133331B80047564A /* CharacterEntityConverter-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CharacterEntityConverter-Prefix.pch"; sourceTree = "<group>"; };
+		B5B94959133331B80047564A /* CharacterEntityConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CharacterEntityConverter.h; sourceTree = "<group>"; };
+		B5B9495A133331B80047564A /* CharacterEntityConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CharacterEntityConverter.m; sourceTree = "<group>"; };
+		B5B9495B133331B80047564A /* NSMutableString+CharacterEntityConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableString+CharacterEntityConverter.h"; sourceTree = "<group>"; };
+		B5B9495C133331B80047564A /* NSMutableString+CharacterEntityConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableString+CharacterEntityConverter.m"; sourceTree = "<group>"; };
+		B5B9495D133331B80047564A /* NSString+CharacterEntityConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+CharacterEntityConverter.h"; sourceTree = "<group>"; };
+		B5B9495E133331B80047564A /* NSString+CharacterEntityConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+CharacterEntityConverter.m"; sourceTree = "<group>"; };
 		B5DFF10C13306C530026638B /* WordPressSyncerDB.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = WordPressSyncerDB.xcdatamodel; sourceTree = "<group>"; };
 		B5DFF11A133086C70026638B /* MOWordPressSyncerComment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MOWordPressSyncerComment.h; sourceTree = "<group>"; };
 		B5DFF11B133086C70026638B /* MOWordPressSyncerComment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MOWordPressSyncerComment.m; sourceTree = "<group>"; };
@@ -225,6 +251,7 @@
 		B59556FC13302E7300BE924A /* WordPressSyncer */ = {
 			isa = PBXGroup;
 			children = (
+				B5B94955133331B80047564A /* CharacterEntityConverter */,
 				B5F34CD313305D430007869D /* Additions */,
 				B5F34CCF13304DFC0007869D /* WordPressSyncerXMLReader.h */,
 				B5F34CD013304DFC0007869D /* WordPressSyncerXMLReader.m */,
@@ -265,6 +292,23 @@
 				B59556FA13302E5200BE924A /* WordPressSyncer-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		B5B94955133331B80047564A /* CharacterEntityConverter */ = {
+			isa = PBXGroup;
+			children = (
+				B5B94956133331B80047564A /* CharacterEntity.h */,
+				B5B94957133331B80047564A /* CharacterEntity.m */,
+				B5B94958133331B80047564A /* CharacterEntityConverter-Prefix.pch */,
+				B5B94959133331B80047564A /* CharacterEntityConverter.h */,
+				B5B9495A133331B80047564A /* CharacterEntityConverter.m */,
+				B5B9495B133331B80047564A /* NSMutableString+CharacterEntityConverter.h */,
+				B5B9495C133331B80047564A /* NSMutableString+CharacterEntityConverter.m */,
+				B5B9495D133331B80047564A /* NSString+CharacterEntityConverter.h */,
+				B5B9495E133331B80047564A /* NSString+CharacterEntityConverter.m */,
+			);
+			name = CharacterEntityConverter;
+			path = CharacterEntityConverter/CharacterEntityConverter;
 			sourceTree = "<group>";
 		};
 		B5F34C51133035B70007869D /* WordPressSyncerTestApp */ = {
@@ -334,6 +378,11 @@
 				B5DFF11C133086C70026638B /* MOWordPressSyncerComment.h in Headers */,
 				B5DFF122133086C90026638B /* MOWordPressSyncerPost.h in Headers */,
 				B5DFF128133086CA0026638B /* MOWordPressSyncerBlog.h in Headers */,
+				B5B9495F133331B80047564A /* CharacterEntity.h in Headers */,
+				B5B94961133331B80047564A /* CharacterEntityConverter-Prefix.pch in Headers */,
+				B5B94962133331B80047564A /* CharacterEntityConverter.h in Headers */,
+				B5B94964133331B80047564A /* NSMutableString+CharacterEntityConverter.h in Headers */,
+				B5B94966133331B80047564A /* NSString+CharacterEntityConverter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -475,6 +524,10 @@
 				B5DFF11D133086C70026638B /* MOWordPressSyncerComment.m in Sources */,
 				B5DFF123133086C90026638B /* MOWordPressSyncerPost.m in Sources */,
 				B5DFF129133086CA0026638B /* MOWordPressSyncerBlog.m in Sources */,
+				B5B94960133331B80047564A /* CharacterEntity.m in Sources */,
+				B5B94963133331B80047564A /* CharacterEntityConverter.m in Sources */,
+				B5B94965133331B80047564A /* NSMutableString+CharacterEntityConverter.m in Sources */,
+				B5B94967133331B80047564A /* NSString+CharacterEntityConverter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,6 +545,10 @@
 				B5DFF11E133086C70026638B /* MOWordPressSyncerComment.m in Sources */,
 				B5DFF124133086C90026638B /* MOWordPressSyncerPost.m in Sources */,
 				B5DFF12A133086CA0026638B /* MOWordPressSyncerBlog.m in Sources */,
+				B5B94969133334DF0047564A /* CharacterEntity.m in Sources */,
+				B5B9496B133334E50047564A /* CharacterEntityConverter.m in Sources */,
+				B5B9496D133334E80047564A /* NSMutableString+CharacterEntityConverter.m in Sources */,
+				B5B9496F133334EB0047564A /* NSString+CharacterEntityConverter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -513,6 +570,10 @@
 				B5DFF11F133086C70026638B /* MOWordPressSyncerComment.m in Sources */,
 				B5DFF125133086C90026638B /* MOWordPressSyncerPost.m in Sources */,
 				B5DFF12B133086CA0026638B /* MOWordPressSyncerBlog.m in Sources */,
+				B5B94968133334DF0047564A /* CharacterEntity.m in Sources */,
+				B5B9496A133334E40047564A /* CharacterEntityConverter.m in Sources */,
+				B5B9496C133334E70047564A /* NSMutableString+CharacterEntityConverter.m in Sources */,
+				B5B9496E133334EA0047564A /* NSString+CharacterEntityConverter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -27,8 +27,6 @@
 		[str appendFormat:@"%@: %@\n", key, [stats valueForKey:key]];
 	}
 	labelDocs.text = str;
-    LOG(@"stats: %@", str);
-	//[labelDocs sizeToFit];
 }
 
 - (void)setStatus:(NSString *)status {
@@ -139,6 +137,7 @@
 #pragma mark WordPressSyncerStoreDelegate
 
 - (void)wordPressSyncerStoreCompleted:(WordPressSyncerStore *)s {
+    LOG(@"sync complete");
 	[self updateStats];
 	[self setStatus:@"complete"];
 }

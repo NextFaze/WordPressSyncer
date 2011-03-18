@@ -3,6 +3,7 @@
 //
 
 #import "WordPressSyncerXMLReader.h"
+#import "NSMutableString+CharacterEntityConverter.h"
 
 NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
 
@@ -103,7 +104,8 @@ NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
         LOG(@"found unescaped ampersand at index %d", rangeAmp.location);
         [str replaceCharactersInRange:rangeAmp withString:@"&amp;"];
     }
-    
+    [str decodeEntitiesForXML];  // remove &rsquo; etc
+
     NSData *ret = [str dataUsingEncoding:NSUTF8StringEncoding];
     [str release];
     return ret;

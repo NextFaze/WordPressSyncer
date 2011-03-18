@@ -52,6 +52,11 @@
     NSDictionary *rss = [result valueForKey:@"rss"];
     NSArray *ret = nil;
     
+    if(fetcher.error) {
+        // xml parse error
+        LOG(@"error: %@", fetcher.error);
+    }
+    
     if(rss) result = rss;
     id items = [[result valueForKey:@"channel"] valueForKey:@"item"];
     

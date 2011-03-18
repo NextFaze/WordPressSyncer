@@ -304,13 +304,25 @@
     MOWordPressSyncerPost *post = [self managedObjectPost:postData];
     NSString *postID = [postData valueForKey:@"postID"];
     NSString *etag = [postData valueForKey:@"etag"];
+    BOOL is_new = NO;
+    NSDate *pubDate = [postData valueForKey:@"pubDate"];
+    int age = -[pubDate timeIntervalSinceNow] / 60;   // minutes
     
     if(post == nil) {
         // create new post
         post = [NSEntityDescription insertNewObjectForEntityForName:@"Post" inManagedObjectContext:managedObjectContext];
+        is_new = YES;
     }
     
-    if(etag) {
+    if(!is_new && age > 60 * 24) {
+        // post is older than one day, do not resync
+        // TODO: configurable time interval
+        LOG(@"existing post %@ age == %d minutes, stopping sync", postID, age);
+        [syncer stop];
+        return;
+    }
+    
+    if(etag && ![blog.rssEtag isEqualToString:etag]) {
         LOG(@"setting blog rss etag: %@", etag);
         blog.rssEtag = etag;
     }
