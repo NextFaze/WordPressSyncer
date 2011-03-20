@@ -19,29 +19,37 @@
 
 @synthesize name, delegate, error, syncer, username, password, categoryId;
 
+#pragma mark -
+
+- (void)initDB {
+    // set up core data
+    [self managedObjectContext];
+    if(managedObjectContext == nil) return;  // error with core data
+    
+    // fetch or create blog record
+    NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:name, @"NAME", nil];
+    NSError *err = nil;
+    LOG(@"data: %@", data);
+    NSFetchRequest *fetch = [managedObjectModel fetchRequestFromTemplateWithName:@"blogByName" substitutionVariables:data];
+    NSArray *blogs = [managedObjectContext executeFetchRequest:fetch error:&err];
+    blog = blogs.count ? [[blogs objectAtIndex:0] retain] : nil;
+    
+    if(blog == nil) {
+        // add server record
+        blog = [[NSEntityDescription insertNewObjectForEntityForName:@"Blog" inManagedObjectContext:managedObjectContext] retain];
+        blog.name = name;
+        [self saveDatabase];
+    }
+}
+
+#pragma mark -
+
 - (id)initWithName:(NSString *)n delegate:(id)d {
     if(n && (self = [super init])) {
         delegate = d;
         name = [n retain];
         
-        // set up core data
-        [self managedObjectContext];
-        if(managedObjectContext == nil) return self;  // error with core data
-        
-        // fetch or create blog record
-        NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:name, @"NAME", nil];
-        NSError *err = nil;
-        LOG(@"data: %@", data);
-        NSFetchRequest *fetch = [managedObjectModel fetchRequestFromTemplateWithName:@"blogByName" substitutionVariables:data];
-        NSArray *blogs = [managedObjectContext executeFetchRequest:fetch error:&err];
-        blog = blogs.count ? [[blogs objectAtIndex:0] retain] : nil;
-        
-        if(blog == nil) {
-            // add server record
-            blog = [[NSEntityDescription insertNewObjectForEntityForName:@"Blog" inManagedObjectContext:managedObjectContext] retain];
-            blog.name = name;
-            [self saveDatabase];
-        }
+        [self performSelectorOnMainThread:@selector(initDB) withObject:nil waitUntilDone:YES];
     }
     
     return self;
@@ -60,6 +68,15 @@
 
 #pragma mark -
 
+- (void)reportError {
+    [delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreFailed:) withObject:self waitUntilDone:YES];
+}
+
+- (void)reportProgress {
+    if([delegate respondsToSelector:@selector(wordPressSyncerStoreProgress:)])
+        [delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreProgress:) withObject:self waitUntilDone:YES];
+}
+
 // save database
 - (BOOL)saveDatabase {
     NSError *err = nil;
@@ -69,18 +86,12 @@
         error = [err retain];
         
         [syncer stop];
-        [delegate wordPressSyncerStoreFailed:self];
+        [self reportError];
     }
+    
+    [self reportProgress];
+
     return err ? NO : YES;
-}
-
-- (void)reportError {
-    [delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreFailed:) withObject:self waitUntilDone:YES];
-}
-
-- (void)reportProgress {
-    if([delegate respondsToSelector:@selector(wordPressSyncerStoreProgress:)])
-        [delegate wordPressSyncerStoreProgress:self];
 }
 
 #pragma mark -
@@ -106,6 +117,10 @@
 
 // purge this store
 - (void)purge {
+    if(![NSThread isMainThread]) {
+        [self performSelectorOnMainThread:@selector(purge) withObject:nil waitUntilDone:YES];
+        return;
+    }
     LOG(@"purging content for %@", name);
     for(MOWordPressSyncerPost *post in blog.posts) {
         [managedObjectContext deleteObject:post];
@@ -263,9 +278,9 @@
     return comments.count ? [comments objectAtIndex:0] : nil;	
 }
 
-#pragma mark WordPressSyncerDelegate
+#pragma mark WordPressSyncerDelegate callbacks (to be run on main thread)
 
-- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSArray *)comments {
+- (void)syncerDidFetchComments:(NSArray *)comments {
     NSDictionary *cdata = [comments objectAtIndex:0];
     NSString *etag = [cdata valueForKey:@"etag"];
     MOWordPressSyncerPost *post = [self managedObjectPost:cdata];
@@ -297,10 +312,10 @@
     
     // save database
     [self saveDatabase];
-    [self reportProgress];
 }
 
-- (void)wordPressSyncer:(WordPressSyncer *)s didFetchPost:(NSDictionary *)postData {
+
+- (void)syncerDidFetchPost:(NSDictionary *)postData {
     MOWordPressSyncerPost *post = [self managedObjectPost:postData];
     NSString *postID = [postData valueForKey:@"postID"];
     NSString *etag = [postData valueForKey:@"etag"];
@@ -336,9 +351,6 @@
     post.creator = [postData valueForKey:@"dc:creator"];
     LOG(@"fetched post: %@ (%@)", postID, post.title);
     
-    // save database
-    [self saveDatabase];
-    
     int commentCount = [[postData valueForKey:@"slash:comments"] intValue];
     if(commentCount > 0) {
         // download comments
@@ -351,11 +363,22 @@
         }
     }
     
-    [self reportProgress];
+    // save database
+    [self saveDatabase];
+}
+
+#pragma mark WordPressSyncerDelegate
+
+- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSArray *)comments {
+    [self performSelectorOnMainThread:@selector(syncerDidFetchComments:) withObject:comments waitUntilDone:YES];
+}
+
+- (void)wordPressSyncer:(WordPressSyncer *)s didFetchPost:(NSDictionary *)postData {
+    [self performSelectorOnMainThread:@selector(syncerDidFetchPost:) withObject:postData waitUntilDone:YES];
 }
 
 - (void)wordPressSyncerCompleted:(WordPressSyncer *)syncer {
-    [delegate wordPressSyncerStoreCompleted:self];
+    [delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreCompleted:) withObject:self waitUntilDone:YES];
 }
 
 - (void)wordPressSyncer:(WordPressSyncer *)s didFailWithError:(NSError *)err {	
