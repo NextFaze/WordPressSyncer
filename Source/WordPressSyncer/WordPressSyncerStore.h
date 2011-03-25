@@ -40,6 +40,7 @@
 - (id)initWithName:(NSString *)name delegate:(id)d;
 
 - (void)fetchChanges;
+- (void)fetchComments:(NSString *)postID;
 - (void)purge;
 - (NSDictionary *)statistics;
 
@@ -56,5 +57,6 @@
 
 @optional
 - (void)wordPressSyncerStoreProgress:(WordPressSyncerStore *)store;
+- (void)wordPressSyncerStore:(WordPressSyncerStore *)store addedPost:(MOWordPressSyncerPost *)post;
 
 @end

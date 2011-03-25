@@ -11,6 +11,7 @@
 
 @interface WordPressSyncerStore(WordPressSyncerStorePrivate)
 - (NSManagedObjectContext *)managedObjectContext;
+- (MOWordPressSyncerPost *)managedObjectPost:(NSDictionary *)postData;
 - (BOOL)saveDatabase;
 @end
 
@@ -112,6 +113,22 @@
         syncer.serverPath = blog.url;
         syncer.categoryId = categoryId;
         [syncer fetchWithEtag:blog.rssEtag];
+    }
+}
+- (void)fetchComments:(NSString *)postID {
+    if(blog.url) {
+        // initialise syncer 
+        if(syncer == nil) {
+            syncer = [[WordPressSyncer alloc] initWithPath:blog.url delegate:self];
+        }
+        syncer.serverPath = blog.url;
+        syncer.categoryId = categoryId;
+
+        MOWordPressSyncerPost *post = [self managedObjectPost:[NSDictionary dictionaryWithObjectsAndKeys:postID, @"postID", nil]];
+        if(post) {
+            // etag functionality on comments rss is broken with the version of wordpress i looked at (3.0.1)
+            [syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
+        }
     }
 }
 
@@ -312,8 +329,13 @@
     
     // save database
     [self saveDatabase];
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                              post.postID, @"postID",
+                              post, @"post",
+                              nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"WordPressSyncerStoreFetchedCommentsNotification" object:self userInfo:userInfo];
 }
-
 
 - (void)syncerDidFetchPost:(NSDictionary *)postData {
     MOWordPressSyncerPost *post = [self managedObjectPost:postData];
@@ -354,7 +376,8 @@
     int commentCount = [[postData valueForKey:@"slash:comments"] intValue];
     if(commentCount > 0) {
         // download comments
-        [syncer fetchComments:postID withEtag:post.commentsEtag];
+        // etag functionality on comments rss is broken with the version of wordpress i looked at (3.0.1)
+        [syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
     }
     else if(commentCount == 0 && [post.comments count]) {
         // remove all comments
@@ -365,6 +388,15 @@
     
     // save database
     [self saveDatabase];
+
+    if([delegate respondsToSelector:@selector(wordPressSyncerStore:addedPost:)])
+        [delegate wordPressSyncerStore:self addedPost:post];
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                              post.postID, @"postID",
+                              post, @"post",
+                              nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"WordPressSyncerStoreFetchedPostNotification" object:self userInfo:userInfo];
 }
 
 #pragma mark WordPressSyncerDelegate
