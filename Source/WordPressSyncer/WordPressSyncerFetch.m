@@ -14,7 +14,7 @@
 
 @implementation WordPressSyncerFetch
 
-@synthesize url, delegate, error, username, password, code, type, etag, responseHeaders;
+@synthesize url, delegate, error, username, password, code, type, etag, responseHeaders, postID;
 
 #pragma mark -
 
@@ -42,6 +42,7 @@
     [password release];
     [responseHeaders release];
     [etag release];
+    [postID release];
     
     [super dealloc];
 }

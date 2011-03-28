@@ -23,6 +23,7 @@ typedef enum {
     NSDictionary *responseHeaders;
     NSString *username, *password;
     NSString *etag;
+    NSString *postID;
     int code;
     WordPressSyncerFetchType type;
     
@@ -33,7 +34,7 @@ typedef enum {
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSURL *url;
 @property (nonatomic, assign) id<WordPressSyncerFetchDelegate> delegate;
-@property (nonatomic, retain) NSString *username, *password, *etag;
+@property (nonatomic, retain) NSString *username, *password, *etag, *postID;
 @property (nonatomic, readonly) int code;
 @property (nonatomic, assign) WordPressSyncerFetchType type;
 @property (nonatomic, readonly) NSDictionary *responseHeaders;

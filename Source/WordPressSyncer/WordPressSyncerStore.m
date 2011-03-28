@@ -297,10 +297,10 @@
 
 #pragma mark WordPressSyncerDelegate callbacks (to be run on main thread)
 
-- (void)syncerDidFetchComments:(NSArray *)comments {
-    NSDictionary *cdata = [comments objectAtIndex:0];
-    NSString *etag = [cdata valueForKey:@"etag"];
-    MOWordPressSyncerPost *post = [self managedObjectPost:cdata];
+- (void)syncerDidFetchComments:(NSDictionary *)commentData {
+    NSArray *comments = [commentData valueForKey:@"comments"];
+    NSString *etag = [commentData valueForKey:@"etag"];
+    MOWordPressSyncerPost *post = [self managedObjectPost:commentData];
     
     if(post == nil) {
         LOG(@"could not find post for comments, skipping");
@@ -401,8 +401,8 @@
 
 #pragma mark WordPressSyncerDelegate
 
-- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSArray *)comments {
-    [self performSelectorOnMainThread:@selector(syncerDidFetchComments:) withObject:comments waitUntilDone:YES];
+- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSDictionary *)commentData {
+    [self performSelectorOnMainThread:@selector(syncerDidFetchComments:) withObject:commentData waitUntilDone:YES];
 }
 
 - (void)wordPressSyncer:(WordPressSyncer *)s didFetchPost:(NSDictionary *)postData {

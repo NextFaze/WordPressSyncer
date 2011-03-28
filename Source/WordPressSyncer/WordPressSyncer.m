@@ -172,6 +172,7 @@
     NSURL *url = [NSURL URLWithString:[self commentsRssUrl:postID]];
     WordPressSyncerFetch *fetcher = [[WordPressSyncerFetch alloc] initWithURL:url delegate:self];
     fetcher.etag = etag;
+    fetcher.postID = postID;
     fetcher.type = WordPressSyncerFetchTypeComments;
     [fetcher fetch];
     [fetcher release];
@@ -258,7 +259,13 @@
             
             [list addObject:commentData];
         }
-        [delegate wordPressSyncer:self didFetchComments:list];
+        NSDictionary *commentData = [NSDictionary dictionaryWithObjectsAndKeys:
+                                     list, @"comments",
+                                     fetcher.postID, @"postID",
+                                     fetcher.etag, @"etag",  // at end, may be nil
+                                     nil];
+
+        [delegate wordPressSyncer:self didFetchComments:commentData];
     }    
 }
 
