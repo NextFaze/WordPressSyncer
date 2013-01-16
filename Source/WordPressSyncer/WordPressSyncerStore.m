@@ -8,9 +8,11 @@
 
 #import "WordPressSyncerStore.h"
 #import "WordPressSyncerError.h"
+#import "SVProgressHUD.h"
 
 @interface WordPressSyncerStore(WordPressSyncerStorePrivate)
 - (NSManagedObjectContext *)managedObjectContext;
+- (MOWordPressSyncerPost *)managedObjectPost:(NSDictionary *)postData;
 - (BOOL)saveDatabase;
 @end
 
@@ -33,6 +35,7 @@
     NSFetchRequest *fetch = [managedObjectModel fetchRequestFromTemplateWithName:@"blogByName" substitutionVariables:data];
     NSArray *blogs = [managedObjectContext executeFetchRequest:fetch error:&err];
     blog = blogs.count ? [[blogs objectAtIndex:0] retain] : nil;
+    LOG(@"blog etag: %@", blog.rssEtag);
     
     if(blog == nil) {
         // add server record
@@ -96,6 +99,16 @@
 
 #pragma mark -
 
++ (NSString *)applicationDocumentsDirectory {
+    return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+}
+
++ (NSString *)storePath {
+    NSString *dbfile = [NSString stringWithFormat:@"WordPressSyncerStore.sqlite"];
+    NSString *storePath = [[self applicationDocumentsDirectory] stringByAppendingPathComponent:dbfile];
+    return storePath;
+}
+
 - (void)setServerPath:(NSString *)path {
     blog.url = path;
 }
@@ -112,6 +125,22 @@
         syncer.serverPath = blog.url;
         syncer.categoryId = categoryId;
         [syncer fetchWithEtag:blog.rssEtag];
+    }
+}
+- (void)fetchComments:(NSString *)postID {
+    if(blog.url) {
+        // initialise syncer 
+        if(syncer == nil) {
+            syncer = [[WordPressSyncer alloc] initWithPath:blog.url delegate:self];
+        }
+        syncer.serverPath = blog.url;
+        syncer.categoryId = categoryId;
+
+        MOWordPressSyncerPost *post = [self managedObjectPost:[NSDictionary dictionaryWithObjectsAndKeys:postID, @"postID", nil]];
+        if(post) {
+            // etag functionality on comments rss is broken with the version of wordpress i looked at (3.0.1)
+            [syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
+        }
     }
 }
 
@@ -199,10 +228,10 @@
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator {
     
     if (persistentStoreCoordinator != nil) return persistentStoreCoordinator;
-    
+
     NSError *err = nil;
-    NSString *dbfile = [NSString stringWithFormat:@"WordPressSyncerStore.sqlite"];
-    NSURL *storeUrl = [NSURL fileURLWithPath: [[self applicationDocumentsDirectory] stringByAppendingPathComponent:dbfile]];	
+    NSString *storePath = [[self class] storePath];
+    NSURL *storeUrl = [NSURL fileURLWithPath:storePath];	
     
     // handle db upgrade
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -280,10 +309,10 @@
 
 #pragma mark WordPressSyncerDelegate callbacks (to be run on main thread)
 
-- (void)syncerDidFetchComments:(NSArray *)comments {
-    NSDictionary *cdata = [comments objectAtIndex:0];
-    NSString *etag = [cdata valueForKey:@"etag"];
-    MOWordPressSyncerPost *post = [self managedObjectPost:cdata];
+- (void)syncerDidFetchComments:(NSDictionary *)commentData {
+    NSArray *comments = [commentData valueForKey:@"comments"];
+    NSString *etag = [commentData valueForKey:@"etag"];
+    MOWordPressSyncerPost *post = [self managedObjectPost:commentData];
     
     if(post == nil) {
         LOG(@"could not find post for comments, skipping");
@@ -312,8 +341,13 @@
     
     // save database
     [self saveDatabase];
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                              post.postID, @"postID",
+                              post, @"post",
+                              nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"WordPressSyncerStoreFetchedCommentsNotification" object:self userInfo:userInfo];
 }
-
 
 - (void)syncerDidFetchPost:(NSDictionary *)postData {
     MOWordPressSyncerPost *post = [self managedObjectPost:postData];
@@ -329,16 +363,17 @@
         is_new = YES;
     }
     
-    if(!is_new && age > 60 * 24) {
-        // post is older than one day, do not resync
-        // TODO: configurable time interval
-        LOG(@"existing post %@ age == %d minutes, stopping sync", postID, age);
-        [syncer stop];
-        return;
-    }
+//    if(!is_new && age > 60 * 24) {
+//    if( !is_new ) {
+//        // post is older than one day, do not resync
+//        // TODO: configurable time interval
+//        LOG(@"existing post %@ age == %d minutes, stopping sync", postID, age);
+//        [syncer stop];
+//        return;
+//    }
     
     if(etag && ![blog.rssEtag isEqualToString:etag]) {
-        LOG(@"setting blog rss etag: %@", etag);
+        LOG(@"syncer '%@' setting blog rss etag: %@", name, etag);
         blog.rssEtag = etag;
     }
     
@@ -354,7 +389,8 @@
     int commentCount = [[postData valueForKey:@"slash:comments"] intValue];
     if(commentCount > 0) {
         // download comments
-        [syncer fetchComments:postID withEtag:post.commentsEtag];
+        // etag functionality on comments rss is broken with the version of wordpress i looked at (3.0.1)
+        [syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
     }
     else if(commentCount == 0 && [post.comments count]) {
         // remove all comments
@@ -365,12 +401,21 @@
     
     // save database
     [self saveDatabase];
+
+    if([delegate respondsToSelector:@selector(wordPressSyncerStore:addedPost:)])
+        [delegate wordPressSyncerStore:self addedPost:post];
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                              post.postID, @"postID",
+                              post, @"post",
+                              nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"WordPressSyncerStoreFetchedPostNotification" object:self userInfo:userInfo];
 }
 
 #pragma mark WordPressSyncerDelegate
 
-- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSArray *)comments {
-    [self performSelectorOnMainThread:@selector(syncerDidFetchComments:) withObject:comments waitUntilDone:YES];
+- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSDictionary *)commentData {
+    [self performSelectorOnMainThread:@selector(syncerDidFetchComments:) withObject:commentData waitUntilDone:YES];
 }
 
 - (void)wordPressSyncer:(WordPressSyncer *)s didFetchPost:(NSDictionary *)postData {
@@ -388,6 +433,7 @@
         error = [err retain];
     }
     [self reportError];
+    [SVProgressHUD dismiss];
 }
 
 

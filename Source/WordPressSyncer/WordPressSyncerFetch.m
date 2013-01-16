@@ -14,7 +14,7 @@
 
 @implementation WordPressSyncerFetch
 
-@synthesize url, delegate, error, username, password, code, type, etag, responseHeaders;
+@synthesize url, delegate, error, username, password, code, type, etag, responseHeaders, postID;
 
 #pragma mark -
 
@@ -42,6 +42,7 @@
     [password release];
     [responseHeaders release];
     [etag release];
+    [postID release];
     
     [super dealloc];
 }
@@ -66,7 +67,7 @@
     }
     
     if(etag) {
-        LOG(@"using etag: %@", etag);
+        LOG(@"using etag: %@, request URL: %@", etag, req.URL);
         [req addValue:etag forHTTPHeaderField:@"If-None-Match"];
     }
     
@@ -114,10 +115,12 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    //LOG(@"connection finished loading");
-    
+    LOG(@"finished loading.");
+       
     // call delegate before finishConnection or we might get freed before the delegate can access our data
     [delegate wordPressSyncerFetchCompleted:self];
+    
+    LOG(@"delegate callback complete.");
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)res {
@@ -127,7 +130,7 @@
         code = [httpResponse statusCode];
         [responseHeaders release];
         responseHeaders = [dictionary retain];
-        LOG(@"response code: %d, content length: %@", code, [dictionary valueForKey:@"Content-Length"]);
+        LOG(@"response code: %d, content length: %@, URL: %@", code, [dictionary valueForKey:@"Content-Length"], res.URL);
     }
 }
 

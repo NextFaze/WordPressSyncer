@@ -13,7 +13,7 @@
 @protocol WordPressSyncerDelegate <NSObject>
 
 - (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchPost:(NSDictionary *)post;
-- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSArray *)comments;
+- (void)wordPressSyncer:(WordPressSyncer *)syncer didFetchComments:(NSDictionary *)comments;
 - (void)wordPressSyncer:(WordPressSyncer *)syncer didFailWithError:(NSError *)error;
 - (void)wordPressSyncerCompleted:(WordPressSyncer *)syncer;
 

@@ -104,6 +104,15 @@ NSString *const kWordPressSyncerXMLReaderTextNodeKey = @"text";
         LOG(@"found unescaped ampersand at index %d", rangeAmp.location);
         [str replaceCharactersInRange:rangeAmp withString:@"&amp;"];
     }
+
+    // remove ',' in tag names
+    for(;;) {
+        NSRange rangeBadTag = [str rangeOfString:@"</?\\w+,[^>]+>" options:NSLiteralSearch|NSRegularExpressionSearch];
+        if(rangeBadTag.location == NSNotFound) break;
+        LOG(@"found , in tag at index %d", rangeBadTag.location);
+        [str replaceOccurrencesOfString:@"," withString:@"" options:NSLiteralSearch range:rangeBadTag];
+    }
+    
     [str decodeEntitiesForXML];  // remove &rsquo; etc
 
     NSData *ret = [str dataUsingEncoding:NSUTF8StringEncoding];

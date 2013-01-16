@@ -7,6 +7,7 @@
 //
 
 #import "WordPressSyncer.h"
+#import "SVProgressHUD.h"
 
 #define MaxDownloadCount        3   // maximum number of concurrent downloads
 #define MaxResponseQueueLength 20   // maximum number of outstanding responses
@@ -112,7 +113,9 @@
 }
 
 - (NSString *)commentsRssUrl:(NSString *)postID {
-    return [NSString stringWithFormat:@"%@/?feed=rss2&p=%@", serverPath, postID];
+    // TODO: this returns ALL comments - need correct query to return only comments for this post, but seems like a permalink is reuired for this.
+    //http://codex.wordpress.org/WordPress_Feeds#Post-specific_comment_feed
+    return [NSString stringWithFormat:@"%@/?p=%@&feed=comments-rss2", serverPath, postID];
 }
 
 - (void)fetchNextPageWithEtag:(NSString *)etag {
@@ -172,6 +175,8 @@
     NSURL *url = [NSURL URLWithString:[self commentsRssUrl:postID]];
     WordPressSyncerFetch *fetcher = [[WordPressSyncerFetch alloc] initWithURL:url delegate:self];
     fetcher.etag = etag;
+    //LOG(@"set etag to %@ for URL %@", etag, url);
+    fetcher.postID = postID;
     fetcher.type = WordPressSyncerFetchTypeComments;
     [fetcher fetch];
     [fetcher release];
@@ -221,6 +226,9 @@
         }
         NSString *etag = [fetcher responseEtag];
         
+        
+        NSDate *dateBeforeProcessing = [NSDate dateWithTimeIntervalSinceNow:0];
+        
         for(NSDictionary *post in posts) {
             NSMutableDictionary *postData = [NSMutableDictionary dictionaryWithDictionary:post];
             
@@ -233,6 +241,15 @@
             
             [delegate wordPressSyncer:self didFetchPost:postData];
         }
+        
+        NSDate *dateAfterProcessing = [NSDate dateWithTimeIntervalSinceNow:0];
+        
+        NSTimeInterval processingTime = [dateAfterProcessing timeIntervalSinceDate:dateBeforeProcessing];
+        
+        LOG(@"Processing complete (%d items). Time taken : %f", posts.count, processingTime);
+        
+        [SVProgressHUD dismiss];
+        
         [self fetchNextPage];
     }
     else if(fetcher.type == WordPressSyncerFetchTypeComments) {
@@ -258,7 +275,13 @@
             
             [list addObject:commentData];
         }
-        [delegate wordPressSyncer:self didFetchComments:list];
+        NSDictionary *commentData = [NSDictionary dictionaryWithObjectsAndKeys:
+                                     list, @"comments",
+                                     fetcher.postID, @"postID",
+                                     fetcher.etag, @"etag",  // at end, may be nil
+                                     nil];
+
+        [delegate wordPressSyncer:self didFetchComments:commentData];
     }    
 }
 
