@@ -127,6 +127,7 @@
         [syncer fetchWithEtag:blog.rssEtag];
     }
 }
+
 - (void)fetchComments:(NSString *)postID {
     if(blog.url) {
         // initialise syncer 
