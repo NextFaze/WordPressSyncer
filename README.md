@@ -31,3 +31,11 @@ posts can be accessed using the following methods of WordPressSyncerStore.
 The above methods return arrays of MOWordPressSyncerPost objects.  The dictionary method of MOWordPressSyncerPost can be used to access the 
 post contents as an NSDictionary (converted from JSON).
 
+
+Notes
+--------
+This library uses submodules, so don't forget to run:
+    git submodule init
+    git submodule update
+
+
