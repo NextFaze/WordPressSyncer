@@ -6,7 +6,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface WordPressSyncerXMLReader : NSObject
+@interface WordPressSyncerXMLReader : NSObject <NSXMLParserDelegate>
 {
     NSMutableArray *dictionaryStack;
     NSMutableString *textInProgress;

@@ -199,7 +199,6 @@
 			isa = PBXGroup;
 			children = (
 				B5362E731331ADA500B88A27 /* README.md */,
-				B5F34CD8133060A40007869D /* CoreData.framework */,
 				B5F34C51133035B70007869D /* WordPressSyncerTestApp */,
 				B59556FC13302E7300BE924A /* WordPressSyncer */,
 				B59556E313302DE400BE924A /* WordPressSyncerTests */,
@@ -221,6 +220,7 @@
 		B59556CF13302DE400BE924A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B5F34CD8133060A40007869D /* CoreData.framework */,
 				B59556D013302DE400BE924A /* Foundation.framework */,
 				B59556DB13302DE400BE924A /* UIKit.framework */,
 				B59556DE13302DE400BE924A /* CoreGraphics.framework */,
