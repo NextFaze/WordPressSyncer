@@ -33,6 +33,7 @@ post contents as an NSDictionary (converted from JSON).
 ## Notes
 
 This library uses submodules, so don't forget to run:
+
     git submodule init
     git submodule update
 
