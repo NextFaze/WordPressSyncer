@@ -39,7 +39,7 @@ This library uses submodules, so don't forget to run:
     
 Submodules:
 
-1. [CharacterEntityConverter)[http://github.com/NextfazeSD/CharacterEntityConverter]
+1. [CharacterEntityConverter](http://github.com/NextfazeSD/CharacterEntityConverter)
 
 ## License
 
