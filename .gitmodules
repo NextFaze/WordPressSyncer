@@ -1,3 +1,3 @@
 [submodule "Source/WordPressSyncer/CharacterEntityConverter"]
 	path = Source/WordPressSyncer/CharacterEntityConverter
-	url = git://github.com/2moro/CharacterEntityConverter.git
+	url = git://github.com/NextfazeSD/CharacterEntityConverter.git
