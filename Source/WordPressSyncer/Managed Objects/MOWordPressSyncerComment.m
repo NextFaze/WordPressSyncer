@@ -3,7 +3,7 @@
 //  WordPressSyncer
 //
 //  Created by Andrew Williams on 16/03/11.
-//  Copyright (c) 2011 2moro mobile. All rights reserved.
+//  Copyright (c) 2013 NextFaze. All rights reserved.
 //
 
 #import "MOWordPressSyncerComment.h"

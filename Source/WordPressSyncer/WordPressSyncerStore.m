@@ -3,7 +3,7 @@
 //  WordPressSyncer
 //
 //  Created by ASW on 26/02/11.
-//  Copyright 2011 2moro mobile. All rights reserved.
+//  Copyright 2013 NextFaze. All rights reserved.
 //
 
 #import "WordPressSyncerStore.h"
@@ -128,6 +128,22 @@
         syncer.serverPath = blog.url;
         syncer.categoryId = categoryId;
         [syncer fetchWithEtag:blog.rssEtag];
+    }
+}
+- (void)fetchComments:(NSString *)postID {
+    if(blog.url) {
+        // initialise syncer 
+        if(syncer == nil) {
+            syncer = [[WordPressSyncer alloc] initWithPath:blog.url delegate:self];
+        }
+        syncer.serverPath = blog.url;
+        syncer.categoryId = categoryId;
+
+        MOWordPressSyncerPost *post = [self managedObjectPost:[NSDictionary dictionaryWithObjectsAndKeys:postID, @"postID", nil]];
+        if(post) {
+            // etag functionality on comments rss is broken with the version of wordpress i looked at (3.0.1)
+            [syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
+        }
     }
 }
 

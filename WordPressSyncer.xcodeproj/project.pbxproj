@@ -199,7 +199,6 @@
 			isa = PBXGroup;
 			children = (
 				B5362E731331ADA500B88A27 /* README.md */,
-				B5F34CD8133060A40007869D /* CoreData.framework */,
 				B5F34C51133035B70007869D /* WordPressSyncerTestApp */,
 				B59556FC13302E7300BE924A /* WordPressSyncer */,
 				B59556E313302DE400BE924A /* WordPressSyncerTests */,
@@ -221,6 +220,7 @@
 		B59556CF13302DE400BE924A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B5F34CD8133060A40007869D /* CoreData.framework */,
 				B59556D013302DE400BE924A /* Foundation.framework */,
 				B59556DB13302DE400BE924A /* UIKit.framework */,
 				B59556DE13302DE400BE924A /* CoreGraphics.framework */,
@@ -448,6 +448,7 @@
 		B59556C413302DE400BE924A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "2moro mobile";
 			};
 			buildConfigurationList = B59556C713302DE400BE924A /* Build configuration list for PBXProject "WordPressSyncer" */;
@@ -637,6 +638,7 @@
 				DSTROOT = /tmp/WordPressSyncer.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WordPressSyncer-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -649,6 +651,7 @@
 				DSTROOT = /tmp/WordPressSyncer.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WordPressSyncer-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -664,6 +667,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WordPressSyncerTests/WordPressSyncerTests-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "WordPressSyncerTests/WordPressSyncerTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -684,6 +688,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WordPressSyncerTests/WordPressSyncerTests-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "WordPressSyncerTests/WordPressSyncerTests-Info.plist";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -703,6 +708,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WordPressSyncer-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "WordPressSyncerTestApp/WordPressSyncerTestApp-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -718,6 +724,7 @@
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "WordPressSyncer-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "WordPressSyncerTestApp/WordPressSyncerTestApp-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
