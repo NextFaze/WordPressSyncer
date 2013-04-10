@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7C9D0C1817150D8D005829FE /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7C9D0C1717150D8D005829FE /* Default-568h@2x.png */; };
 		B59556D113302DE400BE924A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B59556D013302DE400BE924A /* Foundation.framework */; };
 		B59556DC13302DE400BE924A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B59556DB13302DE400BE924A /* UIKit.framework */; };
 		B59556DD13302DE400BE924A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B59556D013302DE400BE924A /* Foundation.framework */; };
@@ -99,6 +100,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7C9D0C1717150D8D005829FE /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		B5362E731331ADA500B88A27 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		B59556CD13302DE400BE924A /* libWordPressSyncer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWordPressSyncer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B59556D013302DE400BE924A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -198,6 +200,7 @@
 		B59556C213302DE400BE924A = {
 			isa = PBXGroup;
 			children = (
+				7C9D0C1717150D8D005829FE /* Default-568h@2x.png */,
 				B5362E731331ADA500B88A27 /* README.md */,
 				B5F34C51133035B70007869D /* WordPressSyncerTestApp */,
 				B59556FC13302E7300BE924A /* WordPressSyncer */,
@@ -489,6 +492,7 @@
 				B5F34CDE133063280007869D /* Icon@2x.png in Resources */,
 				B5F34CE1133063590007869D /* TestAppViewController.xib in Resources */,
 				B5F34CE3133063640007869D /* TestAppDocViewController.xib in Resources */,
+				7C9D0C1817150D8D005829FE /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

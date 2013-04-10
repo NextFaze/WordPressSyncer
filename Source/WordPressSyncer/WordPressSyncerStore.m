@@ -8,7 +8,6 @@
 
 #import "WordPressSyncerStore.h"
 #import "WordPressSyncerError.h"
-#import "ViewHelper.h"
 
 @interface WordPressSyncerStore(WordPressSyncerStorePrivate)
 - (NSManagedObjectContext *)managedObjectContext;
@@ -118,8 +117,10 @@
 
 - (void)fetchChanges {
     if(blog.url) {
-
-        [ViewHelper showProgressHUD];
+        
+        if ([delegate respondsToSelector:@selector(wordPressSyncerStoreStarted:)]) {
+            [delegate wordPressSyncerStoreStarted:self];
+        }
 
         // initialise syncer
         if(syncer == nil) {
@@ -128,22 +129,6 @@
         syncer.serverPath = blog.url;
         syncer.categoryId = categoryId;
         [syncer fetchWithEtag:blog.rssEtag];
-    }
-}
-- (void)fetchComments:(NSString *)postID {
-    if(blog.url) {
-        // initialise syncer 
-        if(syncer == nil) {
-            syncer = [[WordPressSyncer alloc] initWithPath:blog.url delegate:self];
-        }
-        syncer.serverPath = blog.url;
-        syncer.categoryId = categoryId;
-
-        MOWordPressSyncerPost *post = [self managedObjectPost:[NSDictionary dictionaryWithObjectsAndKeys:postID, @"postID", nil]];
-        if(post) {
-            // etag functionality on comments rss is broken with the version of wordpress i looked at (3.0.1)
-            [syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
-        }
     }
 }
 
@@ -443,9 +428,9 @@
 }
 
 - (void)wordPressSyncerCompleted:(WordPressSyncer *)syncer {
-    [ViewHelper dismissProgressHUD];
-
-    [delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreCompleted:) withObject:self waitUntilDone:YES];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [delegate wordPressSyncerStoreCompleted:self];
+    });
 }
 
 - (void)wordPressSyncer:(WordPressSyncer *)s didFailWithError:(NSError *)err {	
@@ -455,7 +440,6 @@
         error = [err retain];
     }
     [self reportError];
-    [ViewHelper dismissProgressHUD];
 }
 
 

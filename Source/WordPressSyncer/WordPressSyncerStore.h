@@ -54,6 +54,7 @@
 
 @protocol WordPressSyncerStoreDelegate <NSObject>
 
+- (void)wordPressSyncerStoreStarted:(WordPressSyncerStore *)store;
 - (void)wordPressSyncerStoreCompleted:(WordPressSyncerStore *)store;
 - (void)wordPressSyncerStoreFailed:(WordPressSyncerStore *)store;
 
