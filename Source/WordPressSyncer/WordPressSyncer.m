@@ -7,7 +7,6 @@
 //
 
 #import "WordPressSyncer.h"
-#import "SVProgressHUD.h"
 
 #define MaxDownloadCount        3   // maximum number of concurrent downloads
 #define MaxResponseQueueLength 20   // maximum number of outstanding responses
@@ -135,8 +134,6 @@
 
 - (void)fetchNextPage {
     
-    [self performSelectorOnMainThread:@selector(showProgressHUD) withObject:nil waitUntilDone:YES];
-
     // fetch after delay so main thread has enough time to display the HUD.
     // timing critical (i know, bad practice) see below stop method. RNS
     [self performSelector:@selector(fetchNextPageWithEtag:) withObject:nil afterDelay:0.5];
@@ -144,25 +141,11 @@
 
 #pragma mark Public
 
-- (void)showProgressHUD
-{
-    [SVProgressHUD showWithStatus:@"Updating ..." maskType:SVProgressHUDMaskTypeBlack];
-}
-
-- (void)dismissProgressHUD
-{
-    [SVProgressHUD dismiss];
-}
-
 - (void)stop {
     // abort all document fetches
     // (prevents new documents being fetched)
     stopped = YES;
     [delegate wordPressSyncerCompleted:self];
-    
-    // give a delay that is larger than above delay, to ensure the HUD is still displayed between fetches.
-    // once again, not the best practice... i know. RNS
-    [self performSelector:@selector(dismissProgressHUD) withObject:nil afterDelay:1.0];
 }
 
 // reset counters
@@ -179,7 +162,7 @@
         LOG(@"already fetching changes, returning");
         return;
     }
-    
+        
     stopped = NO;
     pagenum = 0;
     

@@ -8,7 +8,7 @@
 
 #import "WordPressSyncerStore.h"
 #import "WordPressSyncerError.h"
-#import "SVProgressHUD.h"
+#import "ViewHelper.h"
 
 @interface WordPressSyncerStore(WordPressSyncerStorePrivate)
 - (NSManagedObjectContext *)managedObjectContext;
@@ -118,7 +118,10 @@
 
 - (void)fetchChanges {
     if(blog.url) {
-        // initialise syncer 
+
+        [ViewHelper showProgressHUD];
+
+        // initialise syncer
         if(syncer == nil) {
             syncer = [[WordPressSyncer alloc] initWithPath:blog.url delegate:self];
         }
@@ -424,6 +427,8 @@
 }
 
 - (void)wordPressSyncerCompleted:(WordPressSyncer *)syncer {
+    [ViewHelper dismissProgressHUD];
+
     [delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreCompleted:) withObject:self waitUntilDone:YES];
 }
 
@@ -434,7 +439,7 @@
         error = [err retain];
     }
     [self reportError];
-    [SVProgressHUD dismiss];
+    [ViewHelper dismissProgressHUD];
 }
 
 
