@@ -15,21 +15,7 @@ typedef enum {
     WordPressSyncerFetchTypeComments
 } WordPressSyncerFetchType;
 
-@interface WordPressSyncerFetch : NSObject {
-    NSError *error;
-    NSMutableData *data;
-    NSURL *url;
-    NSURLConnection *conn;
-    NSDictionary *responseHeaders;
-    NSString *username, *password;
-    NSString *etag;
-    NSString *postID;
-    int code;
-    WordPressSyncerFetchType type;
-    
-    id<WordPressSyncerFetchDelegate> delegate;
-}
-
+@interface WordPressSyncerFetch : NSObject
 
 @property (nonatomic, retain) NSError *error;
 @property (nonatomic, retain) NSURL *url;
@@ -43,10 +29,9 @@ typedef enum {
 - (id)initWithURL:(NSURL *)u delegate:(id<WordPressSyncerFetchDelegate>)d;
 
 - (void)fetch;
-- (NSData *)data;
 - (NSString *)string;
 - (NSDictionary *)dictionaryFromXML;
-
+- (NSData *)data;
 - (NSString *)responseEtag;
 
 @end

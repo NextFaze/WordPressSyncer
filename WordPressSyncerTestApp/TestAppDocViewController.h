@@ -10,11 +10,7 @@
 #import "MOWordPressSyncerPost.h"
 
 
-@interface TestAppDocViewController : UIViewController {
-	MOWordPressSyncerPost *post;
-	UIScrollView *scrollView;
-	UILabel *labelContent;
-}
+@interface TestAppDocViewController : UIViewController
 
 @property (nonatomic, retain) IBOutlet UIScrollView *scrollView;
 @property (nonatomic, retain) IBOutlet UILabel *labelContent;

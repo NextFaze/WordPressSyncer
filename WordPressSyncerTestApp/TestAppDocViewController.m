@@ -9,13 +9,15 @@
 #import "TestAppDocViewController.h"
 #import "MOWordPressSyncerComment.h"
 
-@implementation TestAppDocViewController
+@interface TestAppDocViewController ()
+@property (nonatomic, retain) MOWordPressSyncerPost *post;
+@end
 
-@synthesize scrollView, labelContent;
+@implementation TestAppDocViewController
 
 - (id)initWithPost:(MOWordPressSyncerPost *)p {
 	if(self = [super initWithNibName:@"TestAppDocViewController" bundle:nil]) {
-		post = [p retain];
+        self.post = p;
 	}
 	return self;
 }
@@ -36,12 +38,12 @@
     [super viewDidLoad];
 
     NSMutableString *content = [NSMutableString string];
-	[content appendFormat:@"Content:\n%@\nDictionary data:\n%@", post.content, [[post dictionary] description]];
+	[content appendFormat:@"Content:\n%@\nDictionary data:\n%@", self.post.content, [[self.post dictionary] description]];
     
-    for(MOWordPressSyncerComment *comment in post.comments) {
+    for(MOWordPressSyncerComment *comment in self.post.comments) {
         [content appendFormat:@"\nComment:\n%@\n", comment.content];
     }
-	self.title = [NSString stringWithFormat:@"%@", post.postID];
+	self.title = [NSString stringWithFormat:@"%@", self.post.postID];
 
     /*
 	if([document.attachments count]) {
@@ -54,17 +56,17 @@
 	}
      */
 	
-	labelContent.text = content;
+	self.labelContent.text = content;
 	CGSize maxSize = CGSizeMake(260, 9999);
-    CGSize size = [labelContent.text sizeWithFont:labelContent.font 
+    CGSize size = [self.labelContent.text sizeWithFont:self.labelContent.font
 									constrainedToSize:maxSize 
-										lineBreakMode:labelContent.lineBreakMode];
-	CGRect frame = labelContent.frame;
+										lineBreakMode:self.labelContent.lineBreakMode];
+	CGRect frame = self.labelContent.frame;
 	frame.size = size;
-	labelContent.frame = frame;
+	self.labelContent.frame = frame;
 	
 	LOG(@"size: (%.0f,%.0f)", size.width, size.height);
-	[scrollView setContentSize:size];
+	[self.scrollView setContentSize:size];
 }
 
 /*
@@ -90,7 +92,11 @@
 
 
 - (void)dealloc {
-	[post release];
+    RELEASE(_labelContent);
+    RELEASE(_scrollView);
+    
+    RELEASE(_post);
+    
     [super dealloc];
 }
 

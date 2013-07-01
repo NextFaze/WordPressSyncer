@@ -9,37 +9,40 @@
 #import "WordPressSyncerStore.h"
 #import "WordPressSyncerError.h"
 
-@interface WordPressSyncerStore(WordPressSyncerStorePrivate)
-- (NSManagedObjectContext *)managedObjectContext;
-- (MOWordPressSyncerPost *)managedObjectPost:(NSDictionary *)postData;
-- (BOOL)saveDatabase;
+@interface WordPressSyncerStore ()
+
+// core data
+@property (nonatomic, retain) NSManagedObjectModel *managedObjectModel;
+@property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic, retain) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+@property (nonatomic, retain) MOWordPressSyncerBlog *blog;
+@property (nonatomic, retain) NSError *error;
+
 @end
 
-
 @implementation WordPressSyncerStore
-
-@synthesize name, delegate, error, syncer, username, password, categoryId;
 
 #pragma mark -
 
 - (void)initDB {
     // set up core data
     [self managedObjectContext];
-    if(managedObjectContext == nil) return;  // error with core data
+    if(_managedObjectContext == nil) return;  // error with core data
     
     // fetch or create blog record
-    NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:name, @"NAME", nil];
+    NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:self.name, @"NAME", nil];
     NSError *err = nil;
     LOG(@"data: %@", data);
-    NSFetchRequest *fetch = [managedObjectModel fetchRequestFromTemplateWithName:@"blogByName" substitutionVariables:data];
-    NSArray *blogs = [managedObjectContext executeFetchRequest:fetch error:&err];
-    blog = blogs.count ? [[blogs objectAtIndex:0] retain] : nil;
-    LOG(@"blog etag: %@", blog.rssEtag);
+    NSFetchRequest *fetch = [_managedObjectModel fetchRequestFromTemplateWithName:@"blogByName" substitutionVariables:data];
+    NSArray *blogs = [_managedObjectContext executeFetchRequest:fetch error:&err];
+    self.blog = blogs.count ? [blogs objectAtIndex:0] : nil;
+    LOG(@"blog etag: %@", self.blog.rssEtag);
     
-    if(blog == nil) {
+    if(self.blog == nil) {
         // add server record
-        blog = [[NSEntityDescription insertNewObjectForEntityForName:@"Blog" inManagedObjectContext:managedObjectContext] retain];
-        blog.name = name;
+        self.blog = [NSEntityDescription insertNewObjectForEntityForName:@"Blog" inManagedObjectContext:self.managedObjectContext];
+        self.blog.name = self.name;
         [self saveDatabase];
     }
 }
@@ -48,8 +51,8 @@
 
 - (id)initWithName:(NSString *)n delegate:(id)d {
     if(n && (self = [super init])) {
-        delegate = d;
-        name = [n retain];
+        self.delegate = d;
+        _name = [n retain];
         
         [self performSelectorOnMainThread:@selector(initDB) withObject:nil waitUntilDone:YES];
     }
@@ -58,36 +61,34 @@
 }
 
 - (void)dealloc {
-    [name release];
-    [serverPath release];
-    [categoryId release];
-    [blog release];
-    [error release];
-    [syncer release];
-    
+    RELEASE(_name);
+    RELEASE(_categoryId);
+    RELEASE(_blog);
+    RELEASE(_error);
+    RELEASE(_syncer);
+        
     [super dealloc];
 }
 
 #pragma mark -
 
 - (void)reportError {
-    [delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreFailed:) withObject:self waitUntilDone:YES];
+    [self.delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreFailed:) withObject:self waitUntilDone:YES];
 }
 
 - (void)reportProgress {
-    if([delegate respondsToSelector:@selector(wordPressSyncerStoreProgress:)])
-        [delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreProgress:) withObject:self waitUntilDone:YES];
+    if([self.delegate respondsToSelector:@selector(wordPressSyncerStoreProgress:)])
+        [self.delegate performSelectorOnMainThread:@selector(wordPressSyncerStoreProgress:) withObject:self waitUntilDone:YES];
 }
 
 // save database
 - (BOOL)saveDatabase {
     NSError *err = nil;
-    if (![managedObjectContext save:&err]) {
+    if (![self.managedObjectContext save:&err]) {
         LOG(@"error: %@, %@", err, [err userInfo]);
-        [error release];
-        error = [err retain];
+        self.error = err;
         
-        [syncer stop];
+        [self.syncer stop];
         [self reportError];
     }
     
@@ -109,42 +110,42 @@
 }
 
 - (void)setServerPath:(NSString *)path {
-    blog.url = path;
+    self.blog.url = path;
 }
 - (NSString *)serverPath {
-    return blog.url;
+    return self.blog.url;
 }
 
 - (void)fetchChanges {
-    if(blog.url) {
+    if(self.blog.url) {
         
-        if ([delegate respondsToSelector:@selector(wordPressSyncerStoreStarted:)]) {
-            [delegate wordPressSyncerStoreStarted:self];
+        if ([self.delegate respondsToSelector:@selector(wordPressSyncerStoreStarted:)]) {
+            [self.delegate wordPressSyncerStoreStarted:self];
         }
 
         // initialise syncer
-        if(syncer == nil) {
-            syncer = [[WordPressSyncer alloc] initWithPath:blog.url delegate:self];
+        if(self.syncer == nil) {
+            _syncer = [[WordPressSyncer alloc] initWithPath:self.blog.url delegate:self];
         }
-        syncer.serverPath = blog.url;
-        syncer.categoryId = categoryId;
-        [syncer fetchWithEtag:blog.rssEtag];
+        self.syncer.serverPath = self.blog.url;
+        self.syncer.categoryId = self.categoryId;
+        [self.syncer fetchWithEtag:self.blog.rssEtag];
     }
 }
 
 - (void)fetchComments:(NSString *)postID {
-    if(blog.url) {
+    if(self.blog.url) {
         // initialise syncer 
-        if(syncer == nil) {
-            syncer = [[WordPressSyncer alloc] initWithPath:blog.url delegate:self];
+        if(_syncer == nil) {
+            _syncer = [[WordPressSyncer alloc] initWithPath:self.blog.url delegate:self];
         }
-        syncer.serverPath = blog.url;
-        syncer.categoryId = categoryId;
+        self.syncer.serverPath = self.blog.url;
+        self.syncer.categoryId = self.categoryId;
 
         MOWordPressSyncerPost *post = [self managedObjectPost:[NSDictionary dictionaryWithObjectsAndKeys:postID, @"postID", nil]];
         if(post) {
             // etag functionality on comments rss is broken with the version of wordpress i looked at (3.0.1)
-            [syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
+            [self.syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
         }
     }
 }
@@ -155,19 +156,19 @@
         [self performSelectorOnMainThread:@selector(purge) withObject:nil waitUntilDone:YES];
         return;
     }
-    LOG(@"purging content for %@", name);
-    for(MOWordPressSyncerPost *post in blog.posts) {
-        [managedObjectContext deleteObject:post];
+    LOG(@"purging content for %@", self.name);
+    for(MOWordPressSyncerPost *post in self.blog.posts) {
+        [self.managedObjectContext deleteObject:post];
     }
-    blog.rssEtag = nil;
+    self.blog.rssEtag = nil;
     [self saveDatabase];
 }
 
 - (int)countForEntityName:(NSString *)entityName {
     NSError *err = nil;
     NSFetchRequest *request = [[NSFetchRequest alloc] init];
-    [request setEntity:[NSEntityDescription entityForName:entityName inManagedObjectContext:managedObjectContext]];
-    NSUInteger count = [managedObjectContext countForFetchRequest:request error:&err];	
+    [request setEntity:[NSEntityDescription entityForName:entityName inManagedObjectContext:self.managedObjectContext]];
+    NSUInteger count = [self.managedObjectContext countForFetchRequest:request error:&err];
     [request release];
     
     return count;	
@@ -180,21 +181,21 @@
     return [NSDictionary dictionaryWithObjectsAndKeys:
             [NSNumber numberWithInt:posts], @"posts",
             [NSNumber numberWithInt:comments], @"comments",
-            [NSNumber numberWithInt:syncer.bytes], @"bytes transferred",
-            [NSNumber numberWithInt:syncer.countHttpReq], @"HTTP requests",
+            [NSNumber numberWithInt:self.syncer.bytes], @"bytes transferred",
+            [NSNumber numberWithInt:self.syncer.countHttpReq], @"HTTP requests",
             nil];
 }
 
 - (NSArray *)posts {
-    return [blog.posts allObjects];
+    return [self.blog.posts allObjects];
 }
 
 - (NSArray *)postsMatching:(NSPredicate *)predicate {	
     NSError *err = nil;
     NSFetchRequest *request = [[NSFetchRequest alloc] init];
-    [request setEntity:[NSEntityDescription entityForName:@"Post" inManagedObjectContext:managedObjectContext]];
+    [request setEntity:[NSEntityDescription entityForName:@"Post" inManagedObjectContext:self.managedObjectContext]];
     [request setPredicate:predicate];
-    NSArray *ret = [managedObjectContext executeFetchRequest:request error:&err];
+    NSArray *ret = [self.managedObjectContext executeFetchRequest:request error:&err];
     [request release];
     
     return ret;
@@ -217,13 +218,13 @@
  If the model doesn't already exist, it is created by merging all of the models found in the application bundle.
  */
 - (NSManagedObjectModel *)managedObjectModel {
-    if (managedObjectModel != nil) return managedObjectModel;
+    if (_managedObjectModel != nil) return _managedObjectModel;
     
     NSString *path = [[NSBundle mainBundle] pathForResource:@"WordPressSyncerDB" ofType:@"momd"];
     NSURL *momURL = [NSURL fileURLWithPath:path];
-    managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:momURL];
+    _managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:momURL];
     
-    return managedObjectModel;
+    return _managedObjectModel;
 }
 
 /**
@@ -232,7 +233,7 @@
  */
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator {
     
-    if (persistentStoreCoordinator != nil) return persistentStoreCoordinator;
+    if (_persistentStoreCoordinator != nil) return _persistentStoreCoordinator;
 
     NSError *err = nil;
     NSString *storePath = [[self class] storePath];
@@ -243,23 +244,22 @@
                              [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
                              [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, nil];
     
-    persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
+    _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
     
-    if (![persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:options error:&err]) {
+    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:options error:&err]) {
         LOG(@"persistent store error: %@, code = %d", err, [err code]);
         
         // delete the database and try again
-        [[NSFileManager defaultManager] removeItemAtPath:storeUrl.path error:&error];
+        [[NSFileManager defaultManager] removeItemAtPath:storeUrl.path error:&err];
         
-        if (![persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:nil error:&err]) {
+        if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeUrl options:nil error:&err]) {
             LOG(@"second persistent store error: %@", err);
-            [error release];
-            error = [[WordPressSyncerError errorWithCode:WordPressSyncerErrorStore] retain];
+            self.error = (NSError *)[WordPressSyncerError errorWithCode:WordPressSyncerErrorStore];
             [self reportError];
         }
     }
     
-    return persistentStoreCoordinator;
+    return _persistentStoreCoordinator;
 }
 
 /**
@@ -268,16 +268,16 @@
  */
 - (NSManagedObjectContext *)managedObjectContext {
     
-    if (managedObjectContext != nil) return managedObjectContext;
+    if (_managedObjectContext != nil) return _managedObjectContext;
     
     NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
     if (coordinator != nil) {
-        managedObjectContext = [[NSManagedObjectContext alloc] init];
-        [managedObjectContext setUndoManager:nil];
-        [managedObjectContext setPersistentStoreCoordinator: coordinator];
+        _managedObjectContext = [[NSManagedObjectContext alloc] init];
+        [_managedObjectContext setUndoManager:nil];
+        [_managedObjectContext setPersistentStoreCoordinator: coordinator];
     }
     
-    return managedObjectContext;
+    return _managedObjectContext;
 }
 
 /*
@@ -295,8 +295,8 @@
     NSString *postId = [postData valueForKey:@"postID"];
     if(postId == nil) return nil;
     NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:postId, @"POST_ID", nil];
-    NSFetchRequest *fetch = [managedObjectModel fetchRequestFromTemplateWithName:@"postById" substitutionVariables:data];
-    NSArray *posts = [managedObjectContext executeFetchRequest:fetch error:&err];
+    NSFetchRequest *fetch = [_managedObjectModel fetchRequestFromTemplateWithName:@"postById" substitutionVariables:data];
+    NSArray *posts = [_managedObjectContext executeFetchRequest:fetch error:&err];
     return posts.count ? [posts objectAtIndex:0] : nil;	
 }
 
@@ -307,8 +307,8 @@
     NSString *postId = [commentData valueForKey:@"postID"];
     if(postId == nil || commentId == nil) return nil;
     NSDictionary *data = [NSDictionary dictionaryWithObjectsAndKeys:postId, @"POST_ID", commentId, @"COMMENT_ID", nil];
-    NSFetchRequest *fetch = [managedObjectModel fetchRequestFromTemplateWithName:@"commentByIdAndPostId" substitutionVariables:data];
-    NSArray *comments = [managedObjectContext executeFetchRequest:fetch error:&err];
+    NSFetchRequest *fetch = [_managedObjectModel fetchRequestFromTemplateWithName:@"commentByIdAndPostId" substitutionVariables:data];
+    NSArray *comments = [_managedObjectContext executeFetchRequest:fetch error:&err];
     return comments.count ? [comments objectAtIndex:0] : nil;	
 }
 
@@ -326,7 +326,7 @@
     
     // remove all existing comments
     for(MOWordPressSyncerComment *comment in post.comments) {
-        [managedObjectContext deleteObject:comment];
+        [_managedObjectContext deleteObject:comment];
     }
     
     LOG(@"setting post %@ comments etag: %@", post.postID, etag);
@@ -334,7 +334,7 @@
     
     for(NSDictionary *commentData in comments) {
         // create new document
-        MOWordPressSyncerComment *comment = [NSEntityDescription insertNewObjectForEntityForName:@"Comment" inManagedObjectContext:managedObjectContext];
+        MOWordPressSyncerComment *comment = [NSEntityDescription insertNewObjectForEntityForName:@"Comment" inManagedObjectContext:_managedObjectContext];
         
         comment.title = [commentData valueForKey:@"title"];
         comment.content = [commentData valueForKey:@"description"];
@@ -358,14 +358,12 @@
     MOWordPressSyncerPost *post = [self managedObjectPost:postData];
     NSString *postID = [postData valueForKey:@"postID"];
     NSString *etag = [postData valueForKey:@"etag"];
-    BOOL is_new = NO;
-    NSDate *pubDate = [postData valueForKey:@"pubDate"];
-    int age = -[pubDate timeIntervalSinceNow] / 60;   // minutes
+    //NSDate *pubDate = [postData valueForKey:@"pubDate"];
+    //int age = -[pubDate timeIntervalSinceNow] / 60;   // minutes
     
     if(post == nil) {
         // create new post
-        post = [NSEntityDescription insertNewObjectForEntityForName:@"Post" inManagedObjectContext:managedObjectContext];
-        is_new = YES;
+        post = [NSEntityDescription insertNewObjectForEntityForName:@"Post" inManagedObjectContext:_managedObjectContext];
     }
     
 //    if(!is_new && age > 60 * 24) {
@@ -377,15 +375,15 @@
 //        return;
 //    }
     
-    if(etag && ![blog.rssEtag isEqualToString:etag]) {
-        LOG(@"syncer '%@' setting blog rss etag: %@", name, etag);
-        blog.rssEtag = etag;
+    if(etag && ![self.blog.rssEtag isEqualToString:etag]) {
+        LOG(@"syncer '%@' setting blog rss etag: %@", self.name, etag);
+        self.blog.rssEtag = etag;
     }
     
     post.content = [postData valueForKey:@"content:encoded"];
     post.postID = [NSNumber numberWithInt:[postID intValue]];
     post.dictionaryData = [NSKeyedArchiver archivedDataWithRootObject:postData];
-    post.blog = blog;
+    post.blog = self.blog;
     post.pubDate = [postData valueForKey:@"pubDate"];
     post.title = [postData valueForKey:@"title"];
     post.creator = [postData valueForKey:@"dc:creator"];
@@ -395,20 +393,20 @@
     if(commentCount > 0) {
         // download comments
         // etag functionality on comments rss is broken with the version of wordpress i looked at (3.0.1)
-        [syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
+        [self.syncer fetchComments:postID withEtag:nil];  // post.commentsEtag
     }
     else if(commentCount == 0 && [post.comments count]) {
         // remove all comments
         for(MOWordPressSyncerComment *comment in post.comments) {
-            [managedObjectContext deleteObject:comment];
+            [self.managedObjectContext deleteObject:comment];
         }
     }
     
     // save database
     [self saveDatabase];
 
-    if([delegate respondsToSelector:@selector(wordPressSyncerStore:addedPost:)])
-        [delegate wordPressSyncerStore:self addedPost:post];
+    if([self.delegate respondsToSelector:@selector(wordPressSyncerStore:addedPost:)])
+        [self.delegate wordPressSyncerStore:self addedPost:post];
     
     NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
                               post.postID, @"postID",
@@ -429,16 +427,13 @@
 
 - (void)wordPressSyncerCompleted:(WordPressSyncer *)syncer {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [delegate wordPressSyncerStoreCompleted:self];
+        [self.delegate wordPressSyncerStoreCompleted:self];
     });
 }
 
 - (void)wordPressSyncer:(WordPressSyncer *)s didFailWithError:(NSError *)err {	
     LOG(@"error: %@", err);
-    if(err != error) {
-        [error release];
-        error = [err retain];
-    }
+    self.error = err;
     [self reportError];
 }
 

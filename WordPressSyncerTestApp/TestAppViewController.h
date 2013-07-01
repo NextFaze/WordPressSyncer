@@ -9,14 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "WordPressSyncerStore.h"
 
-@interface TestAppViewController : UIViewController <WordPressSyncerStoreDelegate, UITextFieldDelegate> {
-	WordPressSyncerStore *store;
-	
-	UITextField *tfServer, *tfCategoryId;
-	UIButton *buttonSync, *buttonReset, *buttonDocs;
-	UILabel *labelStatus, *labelDocs;
-}
+@interface TestAppViewController : UIViewController <WordPressSyncerStoreDelegate, UITextFieldDelegate>
 
+@property (nonatomic, retain) WordPressSyncerStore *store;
+	
 @property (nonatomic, retain) IBOutlet UILabel *labelStatus, *labelDocs;
 @property (nonatomic, retain) IBOutlet UIButton *buttonSync, *buttonReset, *buttonDocs;
 @property (nonatomic, retain) IBOutlet UITextField *tfServer, *tfCategoryId;

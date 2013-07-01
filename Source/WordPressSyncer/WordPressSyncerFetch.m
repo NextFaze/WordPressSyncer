@@ -12,16 +12,18 @@
 
 #define WordPressSyncerFetchTimeout 20  // seconds
 
+@interface WordPressSyncerFetch ()
+@property (nonatomic, retain) NSMutableData *mutableData;
+@property (nonatomic, retain) NSURLConnection *conn;
+@property (nonatomic, retain) NSDictionary *responseHeaders;
+@end
+
 @implementation WordPressSyncerFetch
-
-@synthesize url, delegate, error, username, password, code, type, etag, responseHeaders, postID;
-
-#pragma mark -
 
 - (id)initWithURL:(NSURL *)u {
     if((self = [super init])) {
         self.url = u;
-        data = [[NSMutableData alloc] init];
+        self.mutableData = [[[NSMutableData alloc] init] autorelease];
     }
     return self;
 }
@@ -34,65 +36,59 @@
 }
 
 - (void)dealloc {
-    delegate = nil;
-    [url release];
-    [data release];
-    [error release];
-    [username release];
-    [password release];
-    [responseHeaders release];
-    [etag release];
-    [postID release];
-    
+    _delegate = nil;
+    RELEASE(_url);
+    RELEASE(_mutableData);
+    RELEASE(_error);
+    RELEASE(_username);
+    RELEASE(_password);
+    RELEASE(_responseHeaders);
+    RELEASE(_etag);
+    RELEASE(_postID);
+
     [super dealloc];
 }
 
 #pragma mark -
 
 - (void)fetch {
-    if(conn) {
+    if(self.conn) {
         LOG(@"fetch already in progress, returning");
         return;
     }
-    [data setLength:0];
+    [self.mutableData setLength:0];
     self.error = nil;
     
-    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:WordPressSyncerFetchTimeout];
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:self.url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:WordPressSyncerFetchTimeout];
     
     // add http auth string
-    if(username && password) {
-        NSString *authString = [NSString stringWithFormat:@"%@:%@", username, password];
+    if(self.username && self.password) {
+        NSString *authString = [NSString stringWithFormat:@"%@:%@", self.username, self.password];
         NSString *authString64 = [[authString dataUsingEncoding:NSUTF8StringEncoding] encodeToBase64];
         [req addValue:[NSString stringWithFormat:@"Basic %@", authString64] forHTTPHeaderField:@"Authorization"]; 
     }
     
-    if(etag) {
-        LOG(@"using etag: %@, request URL: %@", etag, req.URL);
-        [req addValue:etag forHTTPHeaderField:@"If-None-Match"];
+    if(self.etag) {
+        LOG(@"using etag: %@, request URL: %@", self.etag, req.URL);
+        [req addValue:self.etag forHTTPHeaderField:@"If-None-Match"];
     }
     
-    conn = [NSURLConnection alloc];
-    [conn initWithRequest:req delegate:self startImmediately:NO];
-    [conn scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    self.conn = [[[NSURLConnection alloc] initWithRequest:req delegate:self startImmediately:NO] autorelease];
+    [self.conn scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
     
-    LOG(@"fetching URL: %@", url);
-    [conn start];
-    [conn release];
-}
-
-- (NSData *)data {
-    return data;
+    LOG(@"fetching URL: %@", self.url);
+    [self.conn start];
 }
 
 // return data as string
 - (NSString *)string {
-    return [[[NSString alloc] initWithBytes:[data bytes] length:[data length] encoding:NSUTF8StringEncoding] autorelease];
+    return [[[NSString alloc] initWithBytes:[self.data bytes] length:[self.data length] encoding:NSUTF8StringEncoding] autorelease];
 }
 
 // decode the received data as XML and parse into a dictionary
 - (NSDictionary *)dictionaryFromXML {
     WordPressSyncerXMLReader *reader = [[WordPressSyncerXMLReader alloc] init];
-    NSDictionary *dict = [reader dictionaryForXMLData:data];
+    NSDictionary *dict = [reader dictionaryForXMLData:self.data];
     self.error = reader.error;
     [reader release];
     
@@ -100,9 +96,13 @@
 }
 
 - (NSString *)responseEtag {
-    NSString *et = [responseHeaders valueForKey:@"ETag"];
-    if(et == nil) et = [responseHeaders valueForKey:@"Etag"];
+    NSString *et = [self.responseHeaders valueForKey:@"ETag"];
+    if(et == nil) et = [self.responseHeaders valueForKey:@"Etag"];
     return et;
+}
+
+- (NSData *)data {
+    return [NSData dataWithData:self.mutableData];
 }
 
 #pragma mark NSURLConnectionDelegate
@@ -111,14 +111,14 @@
     self.error = err;
     
     // call delegate before finishConnection or we might get freed before the delegate can access our data
-    [delegate wordPressSyncerFetchCompleted:self];
+    [self.delegate wordPressSyncerFetchCompleted:self];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     LOG(@"finished loading.");
        
     // call delegate before finishConnection or we might get freed before the delegate can access our data
-    [delegate wordPressSyncerFetchCompleted:self];
+    [self.delegate wordPressSyncerFetchCompleted:self];
     
     LOG(@"delegate callback complete.");
 }
@@ -127,18 +127,17 @@
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)res;
     if ([res respondsToSelector:@selector(allHeaderFields)]) {
         NSDictionary *dictionary = [httpResponse allHeaderFields];
-        code = [httpResponse statusCode];
-        [responseHeaders release];
-        responseHeaders = [dictionary retain];
-        LOG(@"response code: %d, content length: %@, URL: %@", code, [dictionary valueForKey:@"Content-Length"], res.URL);
+        _code = [httpResponse statusCode];
+        self.responseHeaders = dictionary;
+        LOG(@"response code: %d, content length: %@, URL: %@", _code,
+            [dictionary valueForKey:@"Content-Length"], res.URL);
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)d {
     //LOG(@"received data");
-    [data appendData:d];
+    [self.mutableData appendData:d];
 }
-
 
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     if ([challenge previousFailureCount] > 0) {
@@ -161,7 +160,7 @@
 
 - (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
     // TODO: set error here?
-    [delegate wordPressSyncerFetchCompleted:self];
+    [self.delegate wordPressSyncerFetchCompleted:self];
 }
 
 @end

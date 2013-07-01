@@ -15,40 +15,37 @@
 
 @implementation TestAppViewController
 
-@synthesize tfServer, tfCategoryId;
-@synthesize buttonDocs, buttonReset, buttonSync, labelStatus, labelDocs;
-
 #pragma mark -
 
 - (void)updateStats {
-	NSDictionary *stats = [store statistics];
+	NSDictionary *stats = [self.store statistics];
 	NSMutableString *str = [NSMutableString string];
 	for(NSString *key in [stats allKeys]) {
 		[str appendFormat:@"%@: %@\n", key, [stats valueForKey:key]];
 	}
-	labelDocs.text = str;
+	self.labelDocs.text = str;
 }
 
 - (void)setStatus:(NSString *)status {
-	labelStatus.text = [NSString stringWithFormat:@"status: %@", status];
+	self.labelStatus.text = [NSString stringWithFormat:@"status: %@", status];
 }
 
 - (IBAction)buttonPressed:(id)sender {
-	if(sender == buttonDocs) {
-		TestAppDocListViewController *vc = [[TestAppDocListViewController alloc] initWithPosts:[store posts]];
+	if(sender == self.buttonDocs) {
+		TestAppDocListViewController *vc = [[TestAppDocListViewController alloc] initWithPosts:[self.store posts]];
 		[self.navigationController pushViewController:vc animated:YES];
 		[vc release];
 	}
-	else if(sender == buttonReset) {
-		[store purge];
+	else if(sender == self.buttonReset) {
+		[self.store purge];
 		[self updateStats];
 		[self setStatus:@"inactive"];
 	}
-	else if(sender == buttonSync) {
-        store.serverPath = tfServer.text;
-        store.categoryId = tfCategoryId.text;
+	else if(sender == self.buttonSync) {
+        self.store.serverPath = self.tfServer.text;
+        self.store.categoryId = self.tfCategoryId.text;
 		[self setStatus:@"syncing"];
-		[store fetchChanges];
+		[self.store fetchChanges];
 	}
 }
 
@@ -75,10 +72,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
-    store = [[WordPressSyncerStore alloc] initWithName:TestAppServerName delegate:self];
+    self.store = [[[WordPressSyncerStore alloc] initWithName:TestAppServerName delegate:self] autorelease];
 
-	tfServer.text = [[NSUserDefaults standardUserDefaults] valueForKey:TestAppServerURL];
-	tfCategoryId.text = [[NSUserDefaults standardUserDefaults] valueForKey:TestAppServerCategory];
+	self.tfServer.text = [[NSUserDefaults standardUserDefaults] valueForKey:TestAppServerURL];
+	self.tfCategoryId.text = [[NSUserDefaults standardUserDefaults] valueForKey:TestAppServerCategory];
 	[self updateStats];
 }
 
@@ -102,19 +99,18 @@
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 	
-	[store release];
-	store = nil;
+    self.store = nil;
 }
 
 - (void)dealloc {
-	[tfServer release];
-	[buttonDocs release];
-	[buttonReset release];
-	[buttonSync release];
-	[labelStatus release];
-	[labelDocs release];
+	[_tfServer release];
+	[_buttonDocs release];
+	[_buttonReset release];
+	[_buttonSync release];
+	[_labelStatus release];
+	[_labelDocs release];
 
-	[store release];
+	[_store release];
     [super dealloc];
 }
 
@@ -126,15 +122,19 @@
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
-	if(textField == tfServer) {
+	if(textField == self.tfServer) {
 		// save value
-		[[NSUserDefaults standardUserDefaults] setValue:tfServer.text forKey:TestAppServerURL];
-	} else if(textField == tfCategoryId) {
-        [[NSUserDefaults standardUserDefaults] setValue:tfCategoryId.text forKey:TestAppServerCategory];
+		[[NSUserDefaults standardUserDefaults] setValue:self.tfServer.text forKey:TestAppServerURL];
+	} else if(textField == self.tfCategoryId) {
+        [[NSUserDefaults standardUserDefaults] setValue:self.tfCategoryId.text forKey:TestAppServerCategory];
     }
 }
 
 #pragma mark WordPressSyncerStoreDelegate
+
+- (void)wordPressSyncerStoreStarted:(WordPressSyncerStore *)store {
+    
+}
 
 - (void)wordPressSyncerStoreCompleted:(WordPressSyncerStore *)s {
     LOG(@"sync complete");

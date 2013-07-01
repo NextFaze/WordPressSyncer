@@ -11,10 +11,12 @@
 #define MaxDownloadCount        3   // maximum number of concurrent downloads
 #define MaxResponseQueueLength 20   // maximum number of outstanding responses
 
-@implementation WordPressSyncer
+@interface WordPressSyncer ()
+@property (nonatomic, assign) BOOL stopped;
+@property (nonatomic, assign) int pagenum;
+@end
 
-@synthesize delegate, serverPath, bytes, countHttpReq, username, password;
-@synthesize categoryId;
+@implementation WordPressSyncer
 
 #pragma mark Private
 
@@ -73,7 +75,7 @@
 
 - (id)init {
     if((self = [super init])) {
-        stopped = YES;
+        self.stopped = YES;
     }
     return self;
 }
@@ -87,8 +89,8 @@
 }
 
 - (void)dealloc {
-    delegate = nil;
-    [serverPath release];
+    _delegate = nil;
+    RELEASE(_serverPath);
     
     [super dealloc];
 }
@@ -97,16 +99,16 @@
 
 - (NSString *)rssUrl {
     NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:
-                            [NSString stringWithFormat:@"%d", pagenum], @"paged",
+                            [NSString stringWithFormat:@"%d", self.pagenum], @"paged",
                             @"rss2", @"feed",
-                            categoryId, @"cat",
+                            self.categoryId, @"cat",
                             nil];
     NSMutableArray *paramList = [NSMutableArray array];
     for(NSString *key in [params allKeys]) {
         [paramList addObject:[NSString stringWithFormat:@"%@=%@", key, [params valueForKey:key]]];
     }
     NSString *query = [paramList componentsJoinedByString:@"&"];
-    NSString *path = [NSString stringWithFormat:@"%@/?%@", serverPath, query];
+    NSString *path = [NSString stringWithFormat:@"%@/?%@", self.serverPath, query];
     
     return path;
 }
@@ -114,22 +116,22 @@
 - (NSString *)commentsRssUrl:(NSString *)postID {
     // TODO: this returns ALL comments - need correct query to return only comments for this post, but seems like a permalink is reuired for this.
     //http://codex.wordpress.org/WordPress_Feeds#Post-specific_comment_feed
-    return [NSString stringWithFormat:@"%@/?p=%@&feed=comments-rss2", serverPath, postID];
+    return [NSString stringWithFormat:@"%@/?p=%@&feed=comments-rss2", self.serverPath, postID];
 }
 
 - (void)fetchNextPageWithEtag:(NSString *)etag {
-    if(stopped) {
+    if(self.stopped) {
         LOG(@"stopped, returning");
         return;
     }
-    pagenum++;
+    self.pagenum++;
     NSURL *url = [NSURL URLWithString:[self rssUrl]];
     WordPressSyncerFetch *fetcher = [[WordPressSyncerFetch alloc] initWithURL:url delegate:self];
     fetcher.type = WordPressSyncerFetchTypePosts;
     fetcher.etag = etag;
     [fetcher fetch];
     [fetcher release];
-    countHttpReq++;
+    _countHttpReq++;
 }
 
 - (void)fetchNextPage {
@@ -144,13 +146,13 @@
 - (void)stop {
     // abort all document fetches
     // (prevents new documents being fetched)
-    stopped = YES;
-    [delegate wordPressSyncerCompleted:self];
+    self.stopped = YES;
+    [self.delegate wordPressSyncerCompleted:self];
 }
 
 // reset counters
 - (void)reset {
-    bytes = countHttpReq = 0;
+    _bytes = _countHttpReq = 0;
 }
 
 - (void)fetch {
@@ -158,13 +160,13 @@
 }
 
 - (void)fetchWithEtag:(NSString *)etag {
-    if(!stopped) {
+    if(!self.stopped) {
         LOG(@"already fetching changes, returning");
         return;
     }
         
-    stopped = NO;
-    pagenum = 0;
+    self.stopped = NO;
+    self.pagenum = 0;
     
     [self fetchNextPageWithEtag:etag];
 }
@@ -182,7 +184,7 @@
     fetcher.type = WordPressSyncerFetchTypeComments;
     [fetcher fetch];
     [fetcher release];
-    countHttpReq++;
+    _countHttpReq++;
 }
 
 #pragma mark WordPressSyncerFetchDelegate
@@ -196,17 +198,17 @@
         [self stop];
         
         // notify delegate
-        [delegate wordPressSyncer:self didFailWithError:fetcher.error];
+        [self.delegate wordPressSyncer:self didFailWithError:fetcher.error];
         return;
     }
     
     // fetched rss feed
     int len = [[fetcher data] length];
-    bytes += len;
+    _bytes += len;
     
     if(fetcher.type == WordPressSyncerFetchTypePosts) {
         
-        if(stopped) {
+        if(self.stopped) {
             LOG(@"stopped, returning");
             return;
         }
@@ -240,7 +242,7 @@
             [postData setValue:pubDate forKey:@"pubDate"];
             [postData setValue:etag forKey:@"etag"];
             
-            [delegate wordPressSyncer:self didFetchPost:postData];
+            [self.delegate wordPressSyncer:self didFetchPost:postData];
         }
         
         NSDate *dateAfterProcessing = [NSDate dateWithTimeIntervalSinceNow:0];
@@ -280,7 +282,7 @@
                                      fetcher.etag, @"etag",  // at end, may be nil
                                      nil];
 
-        [delegate wordPressSyncer:self didFetchComments:commentData];
+        [self.delegate wordPressSyncer:self didFetchComments:commentData];
     }    
 }
 

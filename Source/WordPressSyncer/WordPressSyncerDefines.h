@@ -14,3 +14,7 @@
 #define LOG(format, ...)
 #endif
 #endif
+
+#ifndef RELEASE
+#define RELEASE(x) [x release]; x = nil
+#endif

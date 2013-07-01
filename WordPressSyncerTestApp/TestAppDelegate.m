@@ -10,15 +10,13 @@
 
 @implementation TestAppDelegate
 
-@synthesize window, navController;
-
 #pragma mark -
 #pragma mark Application lifecycle
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {   
 
     // Add the tab bar controller's view to the window and display.
-    [self.window addSubview:navController.view];
+    [self.window addSubview:self.navController.view];
     [self.window makeKeyAndVisible];
 	
 	return YES;
@@ -73,8 +71,8 @@
 
 
 - (void)dealloc {
-	[window release];
-	[navController release];
+	[_window release];
+	[_navController release];
     [super dealloc];
 }
 

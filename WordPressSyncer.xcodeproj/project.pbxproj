@@ -18,18 +18,15 @@
 		B59556ED13302DE400BE924A /* WordPressSyncerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B59556EC13302DE400BE924A /* WordPressSyncerTests.m */; };
 		B595576B133033E000BE924A /* WordPressSyncer.h in Headers */ = {isa = PBXBuildFile; fileRef = B595575B133033E000BE924A /* WordPressSyncer.h */; };
 		B595576C133033E000BE924A /* WordPressSyncer.m in Sources */ = {isa = PBXBuildFile; fileRef = B595575C133033E000BE924A /* WordPressSyncer.m */; };
-		B595576D133033E000BE924A /* WordPressSyncer.m in Sources */ = {isa = PBXBuildFile; fileRef = B595575C133033E000BE924A /* WordPressSyncer.m */; };
-		B5955771133033E000BE924A /* WordPressSyncerDebug.h in Headers */ = {isa = PBXBuildFile; fileRef = B595575F133033E000BE924A /* WordPressSyncerDebug.h */; };
+		B5955771133033E000BE924A /* WordPressSyncerDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = B595575F133033E000BE924A /* WordPressSyncerDefines.h */; };
 		B5955772133033E000BE924A /* WordPressSyncerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = B5955760133033E000BE924A /* WordPressSyncerDelegate.h */; };
 		B5955776133033E100BE924A /* WordPressSyncerError.h in Headers */ = {isa = PBXBuildFile; fileRef = B5955763133033E000BE924A /* WordPressSyncerError.h */; };
 		B5955777133033E100BE924A /* WordPressSyncerError.m in Sources */ = {isa = PBXBuildFile; fileRef = B5955764133033E000BE924A /* WordPressSyncerError.m */; };
-		B5955778133033E100BE924A /* WordPressSyncerError.m in Sources */ = {isa = PBXBuildFile; fileRef = B5955764133033E000BE924A /* WordPressSyncerError.m */; };
 		B5955779133033E100BE924A /* WordPressSyncerFetch.h in Headers */ = {isa = PBXBuildFile; fileRef = B5955765133033E000BE924A /* WordPressSyncerFetch.h */; };
 		B595577A133033E100BE924A /* WordPressSyncerFetch.m in Sources */ = {isa = PBXBuildFile; fileRef = B5955766133033E000BE924A /* WordPressSyncerFetch.m */; };
-		B595577B133033E100BE924A /* WordPressSyncerFetch.m in Sources */ = {isa = PBXBuildFile; fileRef = B5955766133033E000BE924A /* WordPressSyncerFetch.m */; };
 		B595577F133033E100BE924A /* WordPressSyncerStore.h in Headers */ = {isa = PBXBuildFile; fileRef = B5955769133033E000BE924A /* WordPressSyncerStore.h */; };
 		B5955780133033E100BE924A /* WordPressSyncerStore.m in Sources */ = {isa = PBXBuildFile; fileRef = B595576A133033E000BE924A /* WordPressSyncerStore.m */; };
-		B5955781133033E100BE924A /* WordPressSyncerStore.m in Sources */ = {isa = PBXBuildFile; fileRef = B595576A133033E000BE924A /* WordPressSyncerStore.m */; };
+		B5AE074D1781658E00BB6E32 /* libWordPressSyncer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B59556CD13302DE400BE924A /* libWordPressSyncer.a */; };
 		B5B9495F133331B80047564A /* CharacterEntity.h in Headers */ = {isa = PBXBuildFile; fileRef = B5B94956133331B80047564A /* CharacterEntity.h */; };
 		B5B94960133331B80047564A /* CharacterEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = B5B94957133331B80047564A /* CharacterEntity.m */; };
 		B5B94961133331B80047564A /* CharacterEntityConverter-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = B5B94958133331B80047564A /* CharacterEntityConverter-Prefix.pch */; };
@@ -81,16 +78,17 @@
 		B5F34CE51330636F0007869D /* TestAppDocListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B5F34C5A133035B70007869D /* TestAppDocListViewController.m */; };
 		B5F34CE6133063A20007869D /* WordPressSyncer-Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = B59556FA13302E5200BE924A /* WordPressSyncer-Prefix.pch */; };
 		B5F34CE8133064740007869D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B5F34C55133035B70007869D /* main.m */; };
-		B5F34CE9133064890007869D /* WordPressSyncerXMLReader.m in Sources */ = {isa = PBXBuildFile; fileRef = B5F34CD013304DFC0007869D /* WordPressSyncerXMLReader.m */; };
-		B5F34CEA133064890007869D /* WordPressSyncerXMLReader.m in Sources */ = {isa = PBXBuildFile; fileRef = B5F34CD013304DFC0007869D /* WordPressSyncerXMLReader.m */; };
-		B5F34CEB1330648D0007869D /* WordPressSyncer.m in Sources */ = {isa = PBXBuildFile; fileRef = B595575C133033E000BE924A /* WordPressSyncer.m */; };
-		B5F34CEC133064930007869D /* WordPressSyncerError.m in Sources */ = {isa = PBXBuildFile; fileRef = B5955764133033E000BE924A /* WordPressSyncerError.m */; };
-		B5F34CED133064960007869D /* WordPressSyncerFetch.m in Sources */ = {isa = PBXBuildFile; fileRef = B5955766133033E000BE924A /* WordPressSyncerFetch.m */; };
-		B5F34CEE133064980007869D /* WordPressSyncerStore.m in Sources */ = {isa = PBXBuildFile; fileRef = B595576A133033E000BE924A /* WordPressSyncerStore.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		B59556E013302DE400BE924A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B59556C413302DE400BE924A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B59556CC13302DE400BE924A;
+			remoteInfo = WordPressSyncer;
+		};
+		B5AE074B1781658A00BB6E32 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B59556C413302DE400BE924A /* Project object */;
 			proxyType = 1;
@@ -115,7 +113,7 @@
 		B59556FA13302E5200BE924A /* WordPressSyncer-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "WordPressSyncer-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		B595575B133033E000BE924A /* WordPressSyncer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordPressSyncer.h; sourceTree = "<group>"; };
 		B595575C133033E000BE924A /* WordPressSyncer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WordPressSyncer.m; sourceTree = "<group>"; };
-		B595575F133033E000BE924A /* WordPressSyncerDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordPressSyncerDebug.h; sourceTree = "<group>"; };
+		B595575F133033E000BE924A /* WordPressSyncerDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordPressSyncerDefines.h; sourceTree = "<group>"; };
 		B5955760133033E000BE924A /* WordPressSyncerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordPressSyncerDelegate.h; sourceTree = "<group>"; };
 		B5955763133033E000BE924A /* WordPressSyncerError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WordPressSyncerError.h; sourceTree = "<group>"; };
 		B5955764133033E000BE924A /* WordPressSyncerError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WordPressSyncerError.m; sourceTree = "<group>"; };
@@ -187,6 +185,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5AE074D1781658E00BB6E32 /* libWordPressSyncer.a in Frameworks */,
 				B5F34CD9133060A40007869D /* CoreData.framework in Frameworks */,
 				B5F34C71133036AE0007869D /* UIKit.framework in Frameworks */,
 				B5F34C72133036AE0007869D /* Foundation.framework in Frameworks */,
@@ -260,7 +259,7 @@
 				B5F34CD013304DFC0007869D /* WordPressSyncerXMLReader.m */,
 				B595575B133033E000BE924A /* WordPressSyncer.h */,
 				B595575C133033E000BE924A /* WordPressSyncer.m */,
-				B595575F133033E000BE924A /* WordPressSyncerDebug.h */,
+				B595575F133033E000BE924A /* WordPressSyncerDefines.h */,
 				B5955760133033E000BE924A /* WordPressSyncerDelegate.h */,
 				B5955763133033E000BE924A /* WordPressSyncerError.h */,
 				B5955764133033E000BE924A /* WordPressSyncerError.m */,
@@ -370,7 +369,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B595576B133033E000BE924A /* WordPressSyncer.h in Headers */,
-				B5955771133033E000BE924A /* WordPressSyncerDebug.h in Headers */,
+				B5955771133033E000BE924A /* WordPressSyncerDefines.h in Headers */,
 				B5955772133033E000BE924A /* WordPressSyncerDelegate.h in Headers */,
 				B5955776133033E100BE924A /* WordPressSyncerError.h in Headers */,
 				B5955779133033E100BE924A /* WordPressSyncerFetch.h in Headers */,
@@ -439,6 +438,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				B5AE074C1781658A00BB6E32 /* PBXTargetDependency */,
 			);
 			name = WordPressSyncerTestApp;
 			productName = WordPressSyncerTestApp;
@@ -541,11 +541,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B59556ED13302DE400BE924A /* WordPressSyncerTests.m in Sources */,
-				B595576D133033E000BE924A /* WordPressSyncer.m in Sources */,
-				B5955778133033E100BE924A /* WordPressSyncerError.m in Sources */,
-				B595577B133033E100BE924A /* WordPressSyncerFetch.m in Sources */,
-				B5955781133033E100BE924A /* WordPressSyncerStore.m in Sources */,
-				B5F34CEA133064890007869D /* WordPressSyncerXMLReader.m in Sources */,
 				B5DFF10E13306C530026638B /* WordPressSyncerDB.xcdatamodeld in Sources */,
 				B5DFF11E133086C70026638B /* MOWordPressSyncerComment.m in Sources */,
 				B5DFF124133086C90026638B /* MOWordPressSyncerPost.m in Sources */,
@@ -566,11 +561,6 @@
 				B5F34CE4133063670007869D /* TestAppDocViewController.m in Sources */,
 				B5F34CE51330636F0007869D /* TestAppDocListViewController.m in Sources */,
 				B5F34CE8133064740007869D /* main.m in Sources */,
-				B5F34CE9133064890007869D /* WordPressSyncerXMLReader.m in Sources */,
-				B5F34CEB1330648D0007869D /* WordPressSyncer.m in Sources */,
-				B5F34CEC133064930007869D /* WordPressSyncerError.m in Sources */,
-				B5F34CED133064960007869D /* WordPressSyncerFetch.m in Sources */,
-				B5F34CEE133064980007869D /* WordPressSyncerStore.m in Sources */,
 				B5DFF10F13306C530026638B /* WordPressSyncerDB.xcdatamodeld in Sources */,
 				B5DFF11F133086C70026638B /* MOWordPressSyncerComment.m in Sources */,
 				B5DFF125133086C90026638B /* MOWordPressSyncerPost.m in Sources */,
@@ -589,6 +579,11 @@
 			isa = PBXTargetDependency;
 			target = B59556CC13302DE400BE924A /* WordPressSyncer */;
 			targetProxy = B59556E013302DE400BE924A /* PBXContainerItemProxy */;
+		};
+		B5AE074C1781658A00BB6E32 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B59556CC13302DE400BE924A /* WordPressSyncer */;
+			targetProxy = B5AE074B1781658A00BB6E32 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

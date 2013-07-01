@@ -9,10 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "TestAppViewController.h"
 
-@interface TestAppDelegate : NSObject <UIApplicationDelegate> {
-	UIWindow *window;
-	UINavigationController *navController;
-}
+@interface TestAppDelegate : NSObject <UIApplicationDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet UINavigationController *navController;

@@ -15,20 +15,7 @@
 
 @protocol WordPressSyncerStoreDelegate;
 
-@interface WordPressSyncerStore : NSObject <WordPressSyncerDelegate> {
-    WordPressSyncer *syncer;
-    NSString *name, *serverPath;
-    
-    // core data
-    NSManagedObjectModel *managedObjectModel;
-    NSManagedObjectContext *managedObjectContext;
-    NSPersistentStoreCoordinator *persistentStoreCoordinator;	
-    
-    NSError *error;
-    
-    MOWordPressSyncerBlog *blog;
-    NSObject<WordPressSyncerStoreDelegate> *delegate;
-}
+@interface WordPressSyncerStore : NSObject <WordPressSyncerDelegate>
 
 @property (nonatomic, readonly) NSString *name;
 @property (nonatomic, retain) NSString *serverPath, *categoryId;
@@ -59,6 +46,7 @@
 - (void)wordPressSyncerStoreFailed:(WordPressSyncerStore *)store;
 
 @optional
+
 - (void)wordPressSyncerStoreProgress:(WordPressSyncerStore *)store;
 - (void)wordPressSyncerStore:(WordPressSyncerStore *)store addedPost:(MOWordPressSyncerPost *)post;
 
